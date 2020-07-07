@@ -8,11 +8,11 @@ Project Director, Developer : Akira Ikeda https://github.com/AkiraIkeda
 VR Developer : Yuya Maruyama https://github.com/maru-v  
 Mitten https://www.mitten.biz/  
 
-VoiPaプロジェクトは、音声や音楽でインタラクティブな映像コンテンツを楽しむためのプロジェクトです。
-VoiPaFireworksFreeは、VoiPaプロジェクトの第一弾です。
-あなたのマイクがリアルタイムで音を録音し、色とりどりの花火を打ち上げます。
+VoiPaプロジェクトは、音声や音楽でインタラクティブな映像コンテンツを楽しむためのプロジェクトです。  
+VoiPaFireworksFreeは、VoiPaプロジェクトの第一弾です。  
+あなたのマイクがリアルタイムで音を録音し、色とりどりの花火を打ち上げます。  
 
-VoiPaプロジェクトは、テクノロジーコミュニティギルドのMittenと共同で開発しています。
-プロジェクトディレクター、開発者：池田陽 Ikeda https://github.com/AkiraIkeda 
+VoiPaプロジェクトは、テクノロジーコミュニティギルドのMittenと共同で開発しています。  
+プロジェクトディレクター、開発者：池田陽 Ikeda https://github.com/AkiraIkeda  
 VR開発者：丸山裕也 https://github.com/maru-v  
 Mitten https://www.mitten.biz/  
