@@ -15,8 +15,3 @@ VoiPaプロジェクトは、音声や音楽でインタラクティブな映像
 VoiPaFireworksFreeは、VoiPaプロジェクトの第一弾です  
 あなたのマイクがリアルタイムで音を録音し、色とりどりの花火を打ち上げます  
 このプログラムはUnity 2019.2.20f1で動作します
-
-VoiPaプロジェクトは、テクノロジーコミュニティギルドのMittenと共同で開発しています  
-プロジェクトディレクター、開発者：池田陽 Ikeda https://github.com/AkiraIkeda  
-VR開発者：丸山裕也 https://github.com/maru-v  
-Mitten https://www.mitten.biz/  
