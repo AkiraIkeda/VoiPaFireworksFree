@@ -4,7 +4,7 @@ VoiPaFireworksFree is the first one of the VoiPa project
 Your microphone records sounds in real-time and the colorful fireworks launched just time  
 This Program runs in Unity 2019.2.20f1  
   
-Update ver1.1.2  
+## Update ver1.1.2  
 Setting : Fireworks begin during setting mode.  
 Added Advanced Setting mode  
 Lively effect : the strength of Ground Effects and "Senrin" Fireworks Effects.  
