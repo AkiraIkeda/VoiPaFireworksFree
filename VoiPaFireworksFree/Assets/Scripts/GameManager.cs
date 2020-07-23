@@ -6,14 +6,24 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class GameManager : Singleton<GameManager>{
+    // Camera
+    public GameObject MainCamera;
+
     // UI
     public GameObject SettingUI;
     public GameObject AudioSpectrumUI;
+    public GameObject AdvancedSettingUI;
     public GameObject FireworksUI;
     public GameObject QuitUI;
+    private GameObject[] allUI;
     public Dropdown dropdownSkybox;
-
-    // SkayBox
+    public Slider SliderLivelyEffect;
+    public Slider SliderShootingWidth;
+    public Slider SliderCameraAngle;
+    public Slider SliderCameraZoom;
+    public Slider SliderCameraHeight;
+    
+    // SkyBox
     public bool skyboxRotation = true;
     public Material skyboxColdNight;
     public Material skyboxDeepDusk;
@@ -23,11 +33,18 @@ public class GameManager : Singleton<GameManager>{
     public float skyRotSpeed = 0.001f;
     private float skyRotVal;
 
+    // Game Objects
+    public Fireworks fireworks;
+
     // Status
-    public bool IsFireworks = false;
+    public bool isFireworks = true;
+    private bool isScene = false;
 
     // Start is called before the first frame update
     void Start(){
+        // All UI
+        allUI = new GameObject[] { SettingUI, AudioSpectrumUI, AdvancedSettingUI, FireworksUI, QuitUI };
+
         // Skybox Material
         skyboxes = new Material[] { skyboxNightMoonBurst, skyboxColdNight, skyboxDeepDusk };
         // Set DropdownSkybox
@@ -37,6 +54,9 @@ public class GameManager : Singleton<GameManager>{
 
         // Show SettingUI
         ShowSettingUI();
+
+        // Set Prefs Default
+        ChangePrefs(Constant.PREFS_01);
     }
 
     // Update is called once per frame
@@ -51,9 +71,9 @@ public class GameManager : Singleton<GameManager>{
         // Escape -> SettingUI
         if(Input.GetKeyDown(KeyCode.Escape)) { 
             // Stop Fireworks
-            if (IsFireworks) {
+            if (isScene) {
                 ShowSettingUI();
-                IsFireworks = false;
+                isScene = false;
             }
             //  Show Quit UI
             else {
@@ -65,32 +85,41 @@ public class GameManager : Singleton<GameManager>{
     // Show FireWorks UI
     public void ShowFireworksUI() {
         // Deactivate All UI
-        GameObject[] allUI = { SettingUI, AudioSpectrumUI, FireworksUI, QuitUI };
         foreach (GameObject UI in allUI) {
             UI.SetActive(false);
         }
         // Active Fireworks UI
         FireworksUI.SetActive(true);
-        IsFireworks = true;
+        isScene = true;
+    }
+
+    // Show Advanced Setting UI
+    public void ShowAdvancedSettingUI() {
+        // Deactivate All UI
+        foreach (GameObject UI in allUI) {
+            UI.SetActive(false);
+        }
+        // Active Fireworks UI
+        AdvancedSettingUI.SetActive(true);
+        AudioSpectrumUI.SetActive(true);
+        isScene = false;
     }
 
     // Show Setting UI
     public void ShowSettingUI() {
         // Deactivate All UI
-        GameObject[] allUI = { SettingUI, AudioSpectrumUI, FireworksUI, QuitUI };
         foreach (GameObject UI in allUI) {
             UI.SetActive(false);
         }
         // Active Setting UI
         SettingUI.SetActive(true);
         AudioSpectrumUI.SetActive(true);
-        IsFireworks = false;
+        isScene = false;
     }
 
     // Show New UI
     void ShowUI(GameObject newUI) {
         // Deactivate All UI
-        GameObject[] allUI = { SettingUI, AudioSpectrumUI, FireworksUI, QuitUI };
         foreach(GameObject UI in allUI) {
             UI.SetActive(false);
         }
@@ -104,6 +133,54 @@ public class GameManager : Singleton<GameManager>{
         skybox = skyboxes[dropdownSkybox.value];
         // Set new skybox
         RenderSettings.skybox = skybox;
+    }
+
+    // Change Camera Angle
+    public void OnSliderCameraAngleChanged() {
+        // Get Value
+        float value = (float)SliderCameraAngle.GetComponent<Slider>().value;
+        // Change Camera Angle
+        MainCamera.transform.rotation = Quaternion.Euler(value, 0, 0);
+    }
+
+    // Change Camera Position
+    public void OnCameraPositionChanged() {
+        // Get Value
+        float height = (float)SliderCameraHeight.GetComponent<Slider>().value;
+        float depth = (float)SliderCameraZoom.GetComponent<Slider>().value;
+        // Change Camera Position
+        MainCamera.transform.position = new Vector3(0, height, depth);
+    }
+
+    // Prefs Button 01
+    public void OnButtonPrefs01() {
+        // Read Preferences
+        Prefs pref = Constant.PREFS_01;
+        // Change Prefs
+        ChangePrefs(pref);
+    }
+
+    // Prefs Button 02
+    public void OnButtonPrefs02() {
+        // Read Preferences
+        Prefs pref = Constant.PREFS_02;
+        // Change Prefs
+        ChangePrefs(pref);
+    }
+
+    // Change Prefs
+    private void ChangePrefs(Prefs pref) {
+        // Set Value
+        MainCamera.transform.position = new Vector3(0, pref.cameraHeight, pref.cameraDepth);
+        MainCamera.transform.rotation = Quaternion.Euler(pref.cameraAngle, 0, 0);
+        fireworks.ChangeLivelyEffectThreshold(pref.livelyEffect);
+        fireworks.ShootingWidth = pref.shootingWidth;
+        // Set UI
+        SliderCameraAngle.GetComponent<Slider>().value = pref.cameraAngle;
+        SliderCameraHeight.GetComponent<Slider>().value = pref.cameraHeight;
+        SliderCameraZoom.GetComponent<Slider>().value = pref.cameraDepth;
+        SliderLivelyEffect.GetComponent<Slider>().value = pref.livelyEffect;
+        SliderShootingWidth.GetComponent<Slider>().value = pref.shootingWidth;
     }
 
     public void OnQuitUIButtonOKPressed() {

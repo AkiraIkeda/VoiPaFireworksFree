@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
@@ -153,6 +154,9 @@ public class Rising : MonoBehaviour{
         main.startColor = (1.0f - ColorBlending) * myColor + ColorBlending * refColor;
         // Start Speed
         main.startSpeed = new ParticleSystem.MinMaxCurve(startSpeed, startSpeed * 1.2f);
+        // Start Size
+        float startSize = Mathf.Sqrt(tone.volume * 3f);
+        main.startSize = new ParticleSystem.MinMaxCurve(startSize, startSize * 1.2f);
 
         // Saki : Star Material by Chord
         var textureSheetAnimation = particleSystem.textureSheetAnimation;

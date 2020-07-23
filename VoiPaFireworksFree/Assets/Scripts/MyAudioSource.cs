@@ -8,6 +8,7 @@ public class MyAudioSource : MonoBehaviour{
     /* Properties */
     // GameManager
     public GameObject GameManager;
+    private bool isFireworks;
     // AudioAnalyser
     public MyAudioAnalyzer audioAnalyzer;
     // Fireworls
@@ -40,10 +41,16 @@ public class MyAudioSource : MonoBehaviour{
     private int sample_index = 6;
     // FFT Frequency
     static float[] frequency;
-    public float freqMinHz = 27;
 
-    // FFT Spectrum Threshold
-    private float spectrum_threshold = 0.1f;
+    // FFT Spectrum
+    // SMA Window
+    public int smaWindow = 5;
+    // Normalized 0 div
+    private float rmsNormDiv = 0.025f;
+    // Filter
+    public float freqMinHz = 27;
+    // Spectrum Threshold
+    private float spectrumThreshold = 0.1f;
     
     // Tone List
     private List<Tone> toneList = new List<Tone>();
@@ -71,6 +78,9 @@ public class MyAudioSource : MonoBehaviour{
         if (devices.Any()) {
             device = devices[0];
         }
+
+        /* Game Manager init */
+        isFireworks = GameManager.GetComponent<GameManager>().isFireworks;
 
         /* UI init */
         // AudioDevices Dropdown Options
@@ -112,7 +122,9 @@ public class MyAudioSource : MonoBehaviour{
 
         /* Audio Source init */
         // Audio Setting
-        AudioSettings.outputSampleRate = sampling_rate;
+        var config = AudioSettings.GetConfiguration();
+        config.sampleRate = sampling_rate;
+        AudioSettings.Reset(config);
         // Audio Clip Start
         audio_source = GetComponent<AudioSource>();
         audio_source.clip = Microphone.Start(device, true, clipLengthSec, sampling_rate);
@@ -132,35 +144,35 @@ public class MyAudioSource : MonoBehaviour{
 
         // RMS
         float rms = RMS(output_all);
-        float div = 0.025f;
         // Add RMS Buffer
         rmsBuffer.Add(rms);
 
         // Get All Spectrum
         audio_source.GetSpectrumData(spectrum_all, 0, FFTWindow.Rectangular);
-        // Spectrum
+        // Using Spectrum
         Array.Copy(spectrum_all, 0, spectrum, 0, sample_max);
 
         // Spectrum PreProcessing
+        // Normalize by RMS
         for (int i = 0; i < spectrum.Length; i++) {
-            spectrum[i] /= (rms + div);
+            spectrum[i] /= (rms + rmsNormDiv);
             spectrum[i] = Mathf.Sqrt(spectrum[i]);
         }
+        // Moving Average
+        spectrum = SMA(spectrum, smaWindow);
 
-        // Spectrum Moving Average
-        spectrum = SMA(spectrum, 3);
-
+        // Peak Detect
         // Spectrum Peak Index
-        int[] peak_index = PeakIndex(spectrum, spectrum_threshold);
+        int[] peakIndex = PeakIndex(spectrum, spectrumThreshold);
 
         // Tone List init
         toneList.Clear();
 
         // Peak
-        if (peak_index.Any()) {
-            for (int i = 0; i < peak_index.Length; i++) {
+        if (peakIndex.Any()) {
+            for (int i = 0; i < peakIndex.Length; i++) {
                 // Get Peak Frequency
-                int index = peak_index[i];
+                int index = peakIndex[i];
                 float freq = frequency[index];
 
                 // Frequency Check
@@ -196,8 +208,7 @@ public class MyAudioSource : MonoBehaviour{
         }
 
         // Update Fireworks
-        bool IsFireworks = GameManager.GetComponent<GameManager>().IsFireworks;
-        if (IsFireworks) {
+        if (isFireworks) {
             // Audio Analysis
             // Tone Buffer
             foreach (Tone tone in toneList){
@@ -258,10 +269,12 @@ public class MyAudioSource : MonoBehaviour{
                     float toneVolume = (float)toneCountCurrent * rmsMeanCurrent;
 
                     // Shoot Rising Stars
-                    fireworks.shootRising(toneListBuffer, rmsMeanCurrent);
+                    // fireworks.shootRising(toneListBuffer, rmsMeanCurrent);
+                    fireworks.shootRisingNew(toneListBuffer, rmsMeanCurrent);
 
                     // Shoot Ground Stars
-                    fireworks.shootGroundEffect(toneListBuffer, rmsMeanCurrent);
+                    // fireworks.shootGroundEffect(toneListBuffer, rmsMeanCurrent);
+                    fireworks.shootGroundEffectNew(toneListBuffer, rmsMeanCurrent);
                 }
                 
                 // Reset Buffer
@@ -277,7 +290,7 @@ public class MyAudioSource : MonoBehaviour{
 
         // Update Audio Spectrum UI
         if (AudioSpectrumUI.activeSelf) {
-            UpdateAudioSpectrumUI(spectrum, peak_index);
+            UpdateAudioSpectrumUI(spectrum, peakIndex);
         }
     }
 
@@ -390,7 +403,7 @@ public class MyAudioSource : MonoBehaviour{
     /* CallBack */
     // Threshold Changed
     public void OnSliderSpectrumThresholdChanged() {
-        spectrum_threshold = (float)SliderSpectrumThreshold.GetComponent<Slider>().value;
+        spectrumThreshold = (float)SliderSpectrumThreshold.GetComponent<Slider>().value;
     }
 
     // Dropdown Audio Device changed
