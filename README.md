@@ -11,7 +11,8 @@ Lively effect : the strength of Ground Effects and "Senrin" Fireworks Effects.
 Fireworks Quality : corrected the relation of firework's height and largeness.  
 
 ![VoiPaFireworksFree01](https://user-images.githubusercontent.com/46648955/86839282-31427b00-c0dc-11ea-909f-99eaf201ad0d.png)
-
+  
+## Creators
 Project Director, Developer : Akira Ikeda https://github.com/AkiraIkeda  
 VR Developer : Yuya Maruyama https://github.com/maru-v  
 VoiPa Project is developed with Mitten, technology community guild.  
