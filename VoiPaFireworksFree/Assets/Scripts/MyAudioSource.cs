@@ -19,7 +19,10 @@ public class MyAudioSource : MonoBehaviour{
     public Dropdown DropdownAudioDevices;
     // Audio Spectrum UI
     public GameObject AudioSpectrumUI;
+    public GameObject SpectrumBars;
     public GameObject SliderSpectrumThreshold;
+    public GameObject SliderBandPass01;
+    public GameObject SliderBandPass02;
     private List<GameObject> bar_list = new List<GameObject>();
     public GameObject SpectrumBarPrefab;
     public int AudioSpectrumOffsetPosition = -500;
@@ -29,13 +32,16 @@ public class MyAudioSource : MonoBehaviour{
     private string[] devices;
     private string device = "";
     // Audio Source
-    private AudioSource audio_source;
+    private AudioSource audioSource;
     private int clipLengthSec = 1;
     // Sampling Rate
-    private int sampling_rate = 44100;
+    private int samplingRate = 44100;
     // FFT Sumple Number
     private int sample = 4096;
-    private int sample_max = 1024;
+    private int sampleMax = 1024;
+    // FFT Parameter
+    private float df;
+    private float freqSampleMax;
     // FFT Sample List
     private int[] sample_list = new int[] { 64, 128, 256, 512, 1024, 2048, 4096, 8192 };
     private int sample_index = 6;
@@ -48,7 +54,8 @@ public class MyAudioSource : MonoBehaviour{
     // Normalized 0 div
     private float rmsNormDiv = 0.025f;
     // Filter
-    public float freqMinHz = 27;
+    private float freqMinHz = 55.0f;
+    private float freqMaxHz;
     // Spectrum Threshold
     private float spectrumThreshold = 0.1f;
     
@@ -90,14 +97,14 @@ public class MyAudioSource : MonoBehaviour{
         // Get Bar Width
         float bar_width = SpectrumBarPrefab.GetComponent<RectTransform>().sizeDelta.x;
         // First Bar position
-        float pos_x = (Screen.width - sample_max * bar_width) / 2 - (Screen.width / 2);
-        for (int i=0; i < sample_max; i++) {
+        float pos_x = (Screen.width - sampleMax * bar_width) / 2 - (Screen.width / 2);
+        for (int i=0; i < sampleMax; i++) {
             // Instantiate Bar Prefab
             var bar = Instantiate(SpectrumBarPrefab);
             // Add Bar List
             bar_list.Add(bar);
             // Attach Bar to UI
-            bar.transform.SetParent(AudioSpectrumUI.transform, false);
+            bar.transform.SetParent(SpectrumBars.transform, false);
             // Change Height Scale
             bar.transform.localScale = new Vector2(1, 0.0f);
             // Bar Position
@@ -107,28 +114,35 @@ public class MyAudioSource : MonoBehaviour{
             bar_rect.localPosition = new Vector2(x, y);
         }
         // Spectrum Threshold Slider Position
-        float slider_height = SliderSpectrumThreshold.GetComponent<RectTransform>().sizeDelta.x;
-        SliderSpectrumThreshold.transform.localPosition = new Vector2(pos_x, (float)AudioSpectrumOffsetPosition + slider_height / 2);
+        float slider_height = SliderSpectrumThreshold.GetComponent<RectTransform>().sizeDelta.y;
+        SliderSpectrumThreshold.transform.localPosition = new Vector2(pos_x, AudioSpectrumOffsetPosition + slider_height / 2);
         // Get Spectrum Threshold
         OnSliderSpectrumThresholdChanged();
 
         /* Analysis init */
+        // FFT Parameter
+        df = (float)samplingRate / 2 / (float)sample;
+        freqSampleMax = df * sampleMax;
         // FFT Frequency
         frequency = new float[sample];
-        float df = (float)sampling_rate / 2 / (float)sample;
         for (int i = 0; i < frequency.Length; i++) {
             frequency[i] = i * df;
         }
+        // Band Pass Filter
+        freqMaxHz = freqSampleMax;
+        // Set Slider Value
+        SliderBandPass01.GetComponent<Slider>().value = freqMinHz / freqSampleMax;
+        SliderBandPass02.GetComponent<Slider>().value = SliderBandPass02.GetComponent<Slider>().maxValue;
 
         /* Audio Source init */
         // Audio Setting
         var config = AudioSettings.GetConfiguration();
-        config.sampleRate = sampling_rate;
+        config.sampleRate = samplingRate;
         AudioSettings.Reset(config);
         // Audio Clip Start
-        audio_source = GetComponent<AudioSource>();
-        audio_source.clip = Microphone.Start(device, true, clipLengthSec, sampling_rate);
-        audio_source.Play();
+        audioSource = GetComponent<AudioSource>();
+        audioSource.clip = Microphone.Start(device, true, clipLengthSec, samplingRate);
+        audioSource.Play();
     }
 
     /* UPDATE */
@@ -137,10 +151,10 @@ public class MyAudioSource : MonoBehaviour{
         // Audio Data
         float[] output_all = new float[sample];
         float[] spectrum_all = new float[sample];
-        float[] spectrum = new float[sample_max];
+        float[] spectrum = new float[sampleMax];
 
         // Get Output
-        audio_source.GetOutputData(output_all, 0);
+        audioSource.GetOutputData(output_all, 0);
 
         // RMS
         float rms = RMS(output_all);
@@ -148,9 +162,9 @@ public class MyAudioSource : MonoBehaviour{
         rmsBuffer.Add(rms);
 
         // Get All Spectrum
-        audio_source.GetSpectrumData(spectrum_all, 0, FFTWindow.Rectangular);
+        audioSource.GetSpectrumData(spectrum_all, 0, FFTWindow.Rectangular);
         // Using Spectrum
-        Array.Copy(spectrum_all, 0, spectrum, 0, sample_max);
+        Array.Copy(spectrum_all, 0, spectrum, 0, sampleMax);
 
         // Spectrum PreProcessing
         // Normalize by RMS
@@ -165,20 +179,18 @@ public class MyAudioSource : MonoBehaviour{
         // Spectrum Peak Index
         int[] peakIndex = PeakIndex(spectrum, spectrumThreshold);
 
+        // Band Pass Filter
+        peakIndex = BandPassFilterToPeaks(peakIndex, frequency, freqMinHz, freqMaxHz);
+
         // Tone List init
         toneList.Clear();
 
-        // Peak
+        // Peak Index to Tone List
         if (peakIndex.Any()) {
             for (int i = 0; i < peakIndex.Length; i++) {
                 // Get Peak Frequency
                 int index = peakIndex[i];
                 float freq = frequency[index];
-
-                // Frequency Check
-                if (freq < freqMinHz) {
-                    continue;
-                }
 
                 // Create Tone Instance
                 Tone tone = new Tone();
@@ -297,7 +309,7 @@ public class MyAudioSource : MonoBehaviour{
     // Update AudioSpectrumUI
     private void UpdateAudioSpectrumUI(float[] spectrum, int[] peak_index){
         // Update Spectrum Bar
-        for (int i = 0; i < sample_max; i++){
+        for (int i = 0; i < sampleMax; i++){
             // Spectrum bar
             GameObject bar = bar_list[i];
             // Value
@@ -366,6 +378,21 @@ public class MyAudioSource : MonoBehaviour{
         return dst;
     }
 
+    // Band Pass Filtering to Peak Index
+    private int[] BandPassFilterToPeaks(int[] peak_index, float[]frequency, float freq_min_hz, float freq_max_hz) {
+        List<int> dst = new List<int>();
+        for (int i = 0; i < peak_index.Length; i++) {
+            // Get Peak Frequency
+            int index = peak_index[i];
+            float freq = frequency[index];
+            // Band Pass Filter
+            if (freq >= freq_min_hz && freq <= freq_max_hz) {
+                dst.Add(index);
+            }
+        }
+        return dst.ToArray();
+    }
+
     // Moving Average : SMA
     private float[] SMA(float[] array, int window_size = 3) {
         // Cehck Odd Number
@@ -401,15 +428,31 @@ public class MyAudioSource : MonoBehaviour{
     }
 
     /* CallBack */
-    // Threshold Changed
+    // Spectrum Threshold Changed
     public void OnSliderSpectrumThresholdChanged() {
-        spectrumThreshold = (float)SliderSpectrumThreshold.GetComponent<Slider>().value;
+        spectrumThreshold = SliderSpectrumThreshold.GetComponent<Slider>().value;
+    }
+
+    // BandPass Changed
+    public void OnSliderBandPassChanged() {
+        // Get Value from Slider
+        float freq01 = SliderBandPass01.GetComponent<Slider>().value * freqSampleMax;
+        float freq02 = SliderBandPass02.GetComponent<Slider>().value * freqSampleMax;
+        // Lower value is FreqMin, Higher value is FreqMax
+        if (freq02 >= freq01) {
+            freqMinHz = freq01;
+            freqMaxHz = freq02;
+        }
+        else {
+            freqMinHz = freq02;
+            freqMaxHz = freq01;
+        }
     }
 
     // Dropdown Audio Device changed
     public void OnDropdownAudioDevicesChanged() {
         // Stop Audio Clip
-        audio_source.Stop();
+        audioSource.Stop();
         // Stop Microphone
         Microphone.End(device);
         // Wait for Stop
@@ -419,11 +462,11 @@ public class MyAudioSource : MonoBehaviour{
         string newDevice = Microphone.devices[DropdownAudioDevices.value];
 
         // Set New device
-        audio_source.clip = Microphone.Start(newDevice, true, clipLengthSec, sampling_rate);
+        audioSource.clip = Microphone.Start(newDevice, true, clipLengthSec, samplingRate);
         // Wait for new Device Ready
         while (Microphone.GetPosition(newDevice) == 0) { }
 
-        audio_source.Play();
+        audioSource.Play();
     }
 
     private void OnValidate() {

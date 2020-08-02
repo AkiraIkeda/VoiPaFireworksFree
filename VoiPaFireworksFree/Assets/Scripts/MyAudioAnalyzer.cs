@@ -7,7 +7,14 @@ public class MyAudioAnalyzer : MonoBehaviour{
     /* Properties */
     public Constant Constant;
 
-    // Get Chord Method
+    // Convert Tone Number to Frequency
+    public float ToneNumber2Frequency(int tone_number, float a4_hz = 442.0f) {
+        float mult = (tone_number - 69) / 12;
+        float freq = a4_hz * Mathf.Pow(2.0f, mult);
+        return freq;
+    }
+
+    // Get Chord Tuple in Tone Arrays
     public Tuple<int, int, string>[] GetChordArray(int[] tone_array) {
         // No Tone Array
         if (!tone_array.Any()) {
@@ -141,7 +148,7 @@ public class MyAudioAnalyzer : MonoBehaviour{
         }return chord_array;
     }
 
-    // Get Main Chord
+    // Get Main Chord in Tone List
     public static string[] GetMainChords(List<Tone> tone_list){
         var toneChordCountList = tone_list
             .GroupBy(x => x.chordID)
@@ -151,7 +158,7 @@ public class MyAudioAnalyzer : MonoBehaviour{
         return toneChordArray;
     }
 
-    // Get Main Tone Number
+    // Get Main Tone Number in Tone List
     public static int[] GetMainToneNumbers(List<Tone> tone_list){
         var toneNumberCountList = tone_list
             .GroupBy(x => x.number % 12)
