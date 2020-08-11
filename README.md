@@ -4,6 +4,8 @@ VoiPaFireworksFree is the first one of the VoiPa project
 Your microphone records sounds in real-time and the colorful fireworks launched just time  
 This Program runs in Unity 2019.2.20f1  
   
+## Windows, Mac & Linux Standalone  
+  
 ## Update ver1.1.4  
 General : Fireworks interlock with the BPM of music.  
 Fireworks Quality : Add Poka Stars in the quiet sound scene.  
