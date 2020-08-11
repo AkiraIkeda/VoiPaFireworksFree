@@ -4,8 +4,13 @@ VoiPaFireworksFree is the first one of the VoiPa project
 Your microphone records sounds in real-time and the colorful fireworks launched just time  
 This Program runs in Unity 2019.2.20f1  
   
-## Windows, Mac & Linux Standalone  
-  
+## Windows, Mac & Linux Standalone exe  
+VoiPaFireworks1.1.4.zip contains the exe file builed to Windows, Mac, Linux Standalone by Unity.  
+* This exe file uses the following Free Assets but the repository does not contains them because the reason of the licence.  
+Standard Assets (for Unity 2017.3) : https://assetstore.unity.com/packages/essentials/asset-packs/standard-assets-for-unity-2017-3-32351  
+AllSky Free - 10 Sky / Skybox Set : https://assetstore.unity.com/packages/2d/textures-materials/sky/allsky-free-10-sky-skybox-set-146014  
+Asset Store Terms of Service and EULA : https://unity3d.com/jp/legal/as_terms  
+
 ## Update ver1.1.4  
 General : Fireworks interlock with the BPM of music.  
 Fireworks Quality : Add Poka Stars in the quiet sound scene.  
