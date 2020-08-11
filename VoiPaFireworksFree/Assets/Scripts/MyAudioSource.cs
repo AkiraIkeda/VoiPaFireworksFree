@@ -50,14 +50,15 @@ public class MyAudioSource : MonoBehaviour{
 
     // FFT Spectrum
     // SMA Window
-    public int smaWindow = 5;
+    public int SpectrumSMAWindow = 3;
     // Normalized 0 div
     private float rmsNormDiv = 0.025f;
     // Filter
-    private float freqMinHz = 55.0f;
+    private float freqMinHz = 65.4f;
     private float freqMaxHz;
     // Spectrum Threshold
-    private float spectrumThreshold = 0.1f;
+    public float spectrumThresholdMin = 0.20f;
+    private float spectrumThreshold = 0.25f;
     
     // Tone List
     private List<Tone> toneList = new List<Tone>();
@@ -65,17 +66,28 @@ public class MyAudioSource : MonoBehaviour{
     private int toneCountCurrent = 0;
 
     // Chord List
-    private List<string> chordList = new List<string>();
-    private int chordListCountMax = 3;
+    private List<Tone> chordToneList = new List<Tone>();
+    private int chordToneListCountMax = 4;
 
     // RMS Buffer
     private List<float> rmsBuffer = new List<float>();
     private float rmsMeanCurrent = 0.0f;
+    private float rmsSDCurrent = 0.0f;
 
     // Frame Count
+    private int fps;
     private int frameCount = 0;
-    public int shootSpan = 45;
     public int frameCountMin = 3;
+
+    // Shoot Span
+    private int shootSpan;
+
+    // BPM
+    private int bpm;
+    public int bpmDefault = 96;
+    public int bpmMin = 40;
+    public int bpmMax = 180;
+    public int bpmIncrement = 2;
 
     /* START */
     // Start is called before the first frame update
@@ -87,7 +99,12 @@ public class MyAudioSource : MonoBehaviour{
         }
 
         /* Game Manager init */
+        // Is Fireworks Flag
         isFireworks = GameManager.GetComponent<GameManager>().isFireworks;
+        // FPS, BPM, Shoot Span
+        fps = GameManager.GetComponent<GameManager>().targetFPS;
+        bpm = bpmDefault;
+        shootSpan = bpm2Frame(bpm, fps);
 
         /* UI init */
         // AudioDevices Dropdown Options
@@ -116,7 +133,7 @@ public class MyAudioSource : MonoBehaviour{
         // Spectrum Threshold Slider Position
         float slider_height = SliderSpectrumThreshold.GetComponent<RectTransform>().sizeDelta.y;
         SliderSpectrumThreshold.transform.localPosition = new Vector2(pos_x, AudioSpectrumOffsetPosition + slider_height / 2);
-        // Get Spectrum Threshold
+        // Spectrum Threshold init
         OnSliderSpectrumThresholdChanged();
 
         /* Analysis init */
@@ -133,7 +150,7 @@ public class MyAudioSource : MonoBehaviour{
         // Set Slider Value
         SliderBandPass01.GetComponent<Slider>().value = freqMinHz / freqSampleMax;
         SliderBandPass02.GetComponent<Slider>().value = SliderBandPass02.GetComponent<Slider>().maxValue;
-
+        
         /* Audio Source init */
         // Audio Setting
         var config = AudioSettings.GetConfiguration();
@@ -149,22 +166,22 @@ public class MyAudioSource : MonoBehaviour{
     // Update is called once per frame
     void Update() {
         // Audio Data
-        float[] output_all = new float[sample];
-        float[] spectrum_all = new float[sample];
+        float[] outputAll = new float[sample];
+        float[] spectrumAll = new float[sample];
         float[] spectrum = new float[sampleMax];
 
         // Get Output
-        audioSource.GetOutputData(output_all, 0);
+        audioSource.GetOutputData(outputAll, 0);
 
         // RMS
-        float rms = RMS(output_all);
+        float rms = RMS(outputAll);
         // Add RMS Buffer
         rmsBuffer.Add(rms);
-
+        
         // Get All Spectrum
-        audioSource.GetSpectrumData(spectrum_all, 0, FFTWindow.Rectangular);
+        audioSource.GetSpectrumData(spectrumAll, 0, FFTWindow.Rectangular);
         // Using Spectrum
-        Array.Copy(spectrum_all, 0, spectrum, 0, sampleMax);
+        Array.Copy(spectrumAll, 0, spectrum, 0, sampleMax);
 
         // Spectrum PreProcessing
         // Normalize by RMS
@@ -173,7 +190,7 @@ public class MyAudioSource : MonoBehaviour{
             spectrum[i] = Mathf.Sqrt(spectrum[i]);
         }
         // Moving Average
-        spectrum = SMA(spectrum, smaWindow);
+        spectrum = SMA(spectrum, SpectrumSMAWindow);
 
         // Peak Detect
         // Spectrum Peak Index
@@ -221,78 +238,129 @@ public class MyAudioSource : MonoBehaviour{
 
         // Update Fireworks
         if (isFireworks) {
-            // Audio Analysis
-            // Tone Buffer
+            // Add Tone to Tone Buffer
             foreach (Tone tone in toneList){
                 toneListBuffer.Add(tone);
             }
 
             // Fireworks Shoot Timing
-            if (frameCount % shootSpan == 0 && toneListBuffer.Any()) {
-                // Tone Count with Averaging Volume
-                var groupListBuffer = toneListBuffer.GroupBy(x => x.number).ToList();
-                toneListBuffer.Clear();
-                foreach (var group in groupListBuffer) {
-                    int count_temp = 0;
-                    float volume_temp = 0.0f;
-                    foreach (var item in group){
-                        count_temp += 1;
-                        volume_temp += item.volume;
-                    }
-                    // Create Tone Copy
-                    Tone tone = new Tone();
-                    tone.number = group.Key;
-                    tone.count = count_temp;
-                    tone.volume = volume_temp / group.Count();
-                    // Add Tone
-                    toneListBuffer.Add(tone);
-                }
+            if (frameCount % shootSpan == 0) {
 
-                // Count Filter
-                toneListBuffer = toneListBuffer.Where(x => x.count > frameCountMin).ToList();
-
-                // Sort by Number
-                toneListBuffer.OrderBy(x => x.number);
-
-                // Get Chord
-                int[] toneArray = toneListBuffer.Select(x => x.number).ToArray();
-                var chordArray = audioAnalyzer.GetChordArray(toneArray);
-                for (int i = 0; i < toneListBuffer.Count; i ++){
-                    toneListBuffer[i].chordRef = chordArray[i].Item2;
-                    toneListBuffer[i].chordID = chordArray[i].Item3;
-                }
-
-                // Shoot Fireworks!!! if Any Tone
+                // Fireworks Processing if Any Tone
                 if (toneListBuffer.Any()) {
-                    // Get Main Chord 
-                    string[] mainChordID = MyAudioAnalyzer.GetMainChords(toneListBuffer);
-                    // Add Current Chord to Chord List
-                    foreach (string chord in mainChordID) {
-                        chordList.Add(chord);
+
+                    // Tone Count with Averaging Volume
+                    var groupListBuffer = toneListBuffer.GroupBy(x => x.number).ToList();
+                    toneListBuffer.Clear();
+                    foreach (var group in groupListBuffer) {
+                        int countTemp = 0;
+                        float volumeTemp = 0.0f;
+                        foreach (var item in group){
+                            countTemp += 1;
+                            volumeTemp += item.volume;
+                        }
+                        // Create Tone Copy
+                        Tone tone = new Tone();
+                        tone.number = group.Key;
+                        tone.count = countTemp;
+                        tone.volume = volumeTemp / group.Count();
+                        // Add Tone
+                        toneListBuffer.Add(tone);
+                    }
+
+                    // Count Filtering
+                    toneListBuffer = toneListBuffer.Where(x => x.count > frameCountMin).ToList();
+
+                    // Sort by Number
+                    toneListBuffer.OrderBy(x => x.number);
+
+                    // Get Chord
+                    int[] toneArray = toneListBuffer.Select(x => x.number).ToArray();
+                    var chordArray = audioAnalyzer.GetChordArray(toneArray);
+                    for (int i = 0; i < toneListBuffer.Count; i++) {
+                        toneListBuffer[i].chordRef = chordArray[i].Item2;
+                        toneListBuffer[i].chordID = chordArray[i].Item3;
+                    }
+
+                    // Chord Progression
+                    /*
+                    // Get Main Chord Tone
+                    var mainChordTone = MyAudioAnalyzer.GetMainChordTone(toneListBuffer.Where(x => x.number <= 60).ToList());
+                    // Any Main Chord Tone
+                    if (mainChordTone != null) {
+                        // Add Chord Tone List
+                        if (chordToneList.Count() > 0) {
+                            // Last Tone
+                            var lastChordTone = chordToneList.Last();
+                            if (mainChordTone.number % 12 != lastChordTone.number % 12) {
+                                chordToneList.Add(mainChordTone);
+                            }
+                        }
+                        else {
+                            chordToneList.Add(mainChordTone);
+                        }
                     }
                     // Get Last Chords 
-                    if (chordList.Count() > chordListCountMax) {
-                        chordList = chordList.Skip(Math.Max(0, chordList.Count() - chordListCountMax)).ToList();
+                    if (chordToneList.Count() > chordToneListCountMax) {
+                        chordToneList = chordToneList.Skip(Math.Max(0, chordToneList.Count() - chordToneListCountMax)).ToList();
                     }
 
-                    // Tone Volume
-                    toneCountCurrent = toneListBuffer.Count();
-                    rmsMeanCurrent = rmsBuffer.Average();
-                    float toneVolume = (float)toneCountCurrent * rmsMeanCurrent;
+                    // Chord Progression
+                    string chordProgression = MyAudioAnalyzer.GetChordProgression(chordToneList);
 
+                    // Debug
+                    if (chordToneList.Count() == chordToneListCountMax) {
+                        string text = chordToneList[0].number.ToString() + "_" + chordToneList[1].number.ToString() + "_" + chordToneList[2].number.ToString() + "_" + chordToneList[3].number.ToString();
+                        Debug.Log(text);
+                        Debug.Log(chordProgression);
+                    }
+                    */
+
+                    // RMS : Mean and SD
+                    rmsMeanCurrent = rmsBuffer.Average();
+                    rmsSDCurrent = SD(rmsBuffer.ToArray());
+
+                    // Shoot Fireworks!!!
                     // Shoot Rising Stars
-                    // fireworks.shootRising(toneListBuffer, rmsMeanCurrent);
-                    fireworks.shootRisingNew(toneListBuffer, rmsMeanCurrent);
+                    fireworks.shootRising(toneListBuffer, rmsMeanCurrent);
 
                     // Shoot Ground Stars
-                    // fireworks.shootGroundEffect(toneListBuffer, rmsMeanCurrent);
-                    fireworks.shootGroundEffectNew(toneListBuffer, rmsMeanCurrent);
+                    fireworks.shootGroundEffect(toneListBuffer, rmsMeanCurrent);
                 }
-                
+
+                // RMS Analysis => Change Shoot Span
+                if (rmsBuffer.Any()) {
+                    // RMS Difference
+                    var rmsDiff = Diff(rmsBuffer.ToArray());
+                    // RMS Difference Normalize
+                    float mean = rmsDiff.Average();
+                    float std = SD(rmsDiff);
+                    var rmsDiffNorm = rmsDiff.Select(x => (x - mean) / (std + 1e-6f)).ToArray();
+                    // RMS Difference Count Over Threshold 
+                    int rmsDiffCount = rmsDiffNorm.Where(x => x > 2.4).ToArray().Length;
+                    // change shoot span
+                    if (rmsDiffCount == 0) {
+                        bpm -= bpmIncrement;
+                    }
+                    else if (rmsDiffCount > 1) {
+                        bpm += bpmIncrement;
+                    }
+                    // Clamp Shoot Span with min max value
+                    bpm = Mathf.Clamp(bpm, bpmMin, bpmMax);
+                    // Shoot Span
+                    shootSpan = bpm2Frame(bpm, fps);
+                    // Debug
+                    /*
+                    Debug.Log("DiffMax : " + rmsDiffNorm.Max());
+                    Debug.Log("Count : " + rmsDiffCount);
+                    Debug.Log("bpm : " + bpm);
+                    */
+                }
+
                 // Reset Buffer
                 toneListBuffer.Clear();
                 rmsBuffer.Clear();
-                // Reset Count
+                // Reset Frame Count
                 frameCount = 0;
             }
 
@@ -332,8 +400,8 @@ public class MyAudioSource : MonoBehaviour{
         }
     }
 
-    /* Calcuration */
-    // Calcurate RMS
+    /* Mathematics */
+    // RMS : Root Mean Squared
     private float RMS(float[] array){
         int len = array.Length;
         float square = 0f;
@@ -343,6 +411,68 @@ public class MyAudioSource : MonoBehaviour{
         float mean = square / (float)len;
         float rms = (float)Math.Sqrt(mean);
         return rms;
+    }
+
+    // Difference
+    private float[] Diff(float[] array) {
+        // Array Check
+        if (!array.Any()) {
+            return array;
+        }
+        // Difference
+        float[] diff = new float[array.Length];
+        diff[0] = 0;
+        for (int i = 1; i < array.Length; i++) {
+            diff[i] = array[i] - array[i - 1];
+        }
+        return diff;
+    }
+
+    // SD : Standard Deviation
+    private float SD(float[] array) {
+        float dst = 0.0f;
+        // Array Check
+        if (!array.Any()) {
+            return dst;
+        }
+        // average
+        float ave = array.Average();
+        // Summation of Squared
+        float sum2 = array.Select(x => x * x).Sum();
+        // Variance
+        float var = sum2 / array.Length - ave * ave;
+        // Standard Deviation
+        dst = Mathf.Sqrt(var);
+        return dst;
+    }
+
+    // SMA : Simple Moving Average
+    private float[] SMA(float[] array, int window_size = 3) {
+        // Cehck Odd Number
+        if (window_size % 2 == 0 || window_size <= 1) {
+            return array;
+        }
+        // SMA Destination
+        float[] dst = new float[array.Length];
+        // 0 Padding Data by window size
+        float[] pad = new float[array.Length + window_size - 1];
+        int first_index = (window_size - 1) / 2;
+        Array.Copy(array, 0, pad, first_index, array.Length);
+
+        /*
+        // SMA
+        float[] temp = Enumerable.Range(0, pad.Length - window_size + 1)
+            .Select(i => pad.Skip(i).Take(window_size).Average()).ToArray();
+        // Copy to Destination
+        Array.Copy(temp, 0, dst, 0, array.Length);
+        */
+
+        // SMA
+        for (int i = 0; i < array.Length; i++) {
+            dst[i] = pad.Skip(i).Take(window_size).Average();
+        }
+
+        return dst;
     }
 
     // Detect Peak Index
@@ -393,44 +523,29 @@ public class MyAudioSource : MonoBehaviour{
         return dst.ToArray();
     }
 
-    // Moving Average : SMA
-    private float[] SMA(float[] array, int window_size = 3) {
-        // Cehck Odd Number
-        if (window_size % 2 == 0 || window_size <= 1) {
-            return array;
-        }
-        // SMA Destination
-        float[] dst = new float[array.Length];
-        // 0 Padding Data by window size
-        float[] pad = new float[array.Length + window_size - 1];
-        int first_index = (window_size - 1) / 2;
-        Array.Copy(array, 0, pad, first_index, array.Length);
-
-        /*
-        // SMA
-        float[] temp = Enumerable.Range(0, pad.Length - window_size + 1)
-            .Select(i => pad.Skip(i).Take(window_size).Average()).ToArray();
-        // Copy to Destination
-        Array.Copy(temp, 0, dst, 0, array.Length);
-        */
-
-        // SMAA
-        for (int i = 0; i < array.Length; i++) {
-            dst[i] = pad.Skip(i).Take(window_size).Average();
-        }
-
-        return dst;
-    }
-
-    // Convert Frequency to Note Number
+    /* Convert Unit */
+    // Frequency to Note Number
     private int Freq2NoteNum(float frequency, int a4_hz = 442) {
         return Mathf.FloorToInt(69 + 12 * Mathf.Log(frequency / a4_hz, 2));
+    }
+
+    // BPM to Frame
+    private int bpm2Frame(int bpm, int fps) {
+        return (int)(fps / (bpm / 60f));
     }
 
     /* CallBack */
     // Spectrum Threshold Changed
     public void OnSliderSpectrumThresholdChanged() {
-        spectrumThreshold = SliderSpectrumThreshold.GetComponent<Slider>().value;
+        float value = SliderSpectrumThreshold.GetComponent<Slider>().value;
+        if (value >= spectrumThresholdMin) {
+            spectrumThreshold = SliderSpectrumThreshold.GetComponent<Slider>().value;
+        }
+        else {
+            spectrumThreshold = spectrumThresholdMin;
+            SliderSpectrumThreshold.GetComponent<Slider>().value = spectrumThresholdMin;
+        }
+        
     }
 
     // BandPass Changed

@@ -6,10 +6,6 @@ using UnityEngine;
 
 public class Rising : MonoBehaviour{
     /* Properties */
-    // MonoBehavior
-    public Material materialStar;
-    public Material materialSazanami;
-
     // GameObjects
     public GameObject StarObjects;
     // Normal Stars
@@ -31,14 +27,24 @@ public class Rising : MonoBehaviour{
     public GameObject KamuroSenrinStar;
     public GameObject YanagiSenrinStar;
     public GameObject HachiSenrinStar;
+    // Poka Stars
+    public GameObject BotanPokaStar;
+    public GameObject KikuPokaStar;
+    public GameObject YashiPokaStar;
+    public GameObject KamuroPokaStar;
+    public GameObject YanagiPokaStar;
 
     // Public
+    // Common Setting Parameter
     public int OpenVelocityThreshold = 5;
     public float DestroyDelay = 0.5f;
     public float SpeedCoefficient = 120.0f;
     public float SpeedMin = 20.0f;
     public float SpeedMax = 50.0f;
     public float ColorBlending = 0.33f;
+    // Individual Setting Parameter
+    public float PokaStarSpeedCoefficient = 0.25f;
+    // Externally Accesable Parameter
     public List<Tone> ToneList = new List<Tone>();
     public float ToneCountValue = 0f;
     public string Type = Constant.FIREWORKS_RISING_TYPE_NORMAL;
@@ -76,14 +82,21 @@ public class Rising : MonoBehaviour{
                     speed = Mathf.Clamp(speed, SpeedMin, SpeedMax);
                     // Open by Type
                     switch (Type) {
+                        // Normal
                         case Constant.FIREWORKS_RISING_TYPE_NORMAL:
                             Open(position, ToneList[i], speed);
                             break;
+                        // Sparese
                         case Constant.FIREWORKS_RISING_TYPE_SPARSE:
                             OpenSparse(position, ToneList[i], speed);
                             break;
+                        // Senrin
                         case Constant.FIREWORKS_RISING_TYPE_SENRIN:
                             OpenSenrin(position, ToneList[i], speed, ToneCountValue);
+                            break;
+                        // Poka
+                        case Constant.FIREWORKS_RISING_TYPE_POKA:
+                            OpenPoka(position, ToneList[i], speed);
                             break;
                         default:
                             Debug.Log("Error : No Fireworks type in Constant.FIREWORKS_TYPE:" + Type);
@@ -341,6 +354,93 @@ public class Rising : MonoBehaviour{
         main.startColor = (1.0f - ColorBlending) * myColor + ColorBlending * refColor;
         // Start Speed
         main.startSpeed = new ParticleSystem.MinMaxCurve(startSpeed, startSpeed * 1.2f);
+
+        // Emit
+        var count = particleSystem.emission.GetBurst(0).count.constant;
+        particleSystem.Emit((int)count);
+
+        // Opend
+        isOpend = true;
+
+        // Stop this Rising
+        _particleSystem.Clear();
+        _particleSystem.Stop();
+        _particleSystem.tag = Constant.TAG_RISING_STANBY;
+    }
+
+    // Open Poka FireWorks
+    void OpenPoka(Vector3 position, Tone tone, float start_speed) {
+        // Instantiate Star
+        GameObject obj = null;
+        // Star :  by Tone Count
+        if (tone.count < 10) {
+            // First Search Stanby Star
+            obj = GameObject.FindGameObjectWithTag(Constant.TAG_BOTAN_POKA_STAR_STANBY);
+            if (obj == null) {
+                // Instantiate New Star
+                obj = GameObject.Instantiate(BotanPokaStar, position, Quaternion.identity, StarObjects.transform);
+            }
+        }
+        else if (tone.count < 20) {
+            obj = GameObject.FindGameObjectWithTag(Constant.TAG_KIKU_POKA_STAR_STANBY);
+            if (obj == null) {
+                obj = GameObject.Instantiate(KikuPokaStar, position, Quaternion.identity, StarObjects.transform);
+            }
+        }
+        else if (tone.count < 30) {
+            obj = GameObject.FindGameObjectWithTag(Constant.TAG_YASHI_POKA_STAR_STANBY);
+            if (obj == null) {
+                obj = GameObject.Instantiate(YashiPokaStar, position, Quaternion.identity, StarObjects.transform);
+            }
+        }
+        else if (tone.count < 40) {
+            obj = GameObject.FindGameObjectWithTag(Constant.TAG_KAMURO_POKA_STAR_STANBY);
+            if (obj == null) {
+                obj = GameObject.Instantiate(KamuroPokaStar, position, Quaternion.identity, StarObjects.transform);
+            }
+        }
+        else {
+            obj = GameObject.FindGameObjectWithTag(Constant.TAG_YANAGI_POKA_STAR_STANBY);
+            if (obj == null) {
+                obj = GameObject.Instantiate(YanagiPokaStar, position, Quaternion.identity, StarObjects.transform);
+            }
+        }
+        // Change Tag to Updating
+        obj.tag = Constant.TAG_FIREWORKS_UPDATING;
+
+        // Particle System Transform
+        var transform = obj.GetComponent<Transform>();
+        transform.position = position;
+        transform.rotation = UnityEngine.Random.rotation;
+
+        // Particle System of Star
+        var particleSystem = obj.GetComponent<ParticleSystem>();
+
+        // Particle Sysytem Main Module
+        var main = particleSystem.main;
+        // Start Color
+        Color myColor = Colors.getToneColor(tone.number);
+        Color refColor = Colors.getToneColor(tone.chordRef);
+        main.startColor = (1.0f - ColorBlending) * myColor + ColorBlending * refColor;
+        // Start Speed
+        float startSpeed = start_speed * PokaStarSpeedCoefficient;
+        main.startSpeed = new ParticleSystem.MinMaxCurve(startSpeed, startSpeed * 1.2f);
+        // Start Size
+        float startSize = Mathf.Sqrt(tone.volume * 3f);
+        main.startSize = new ParticleSystem.MinMaxCurve(startSize, startSize * 1.2f);
+
+        // Saki : Star Material by Chord
+        var textureSheetAnimation = particleSystem.textureSheetAnimation;
+        // Minor => Sazanami
+        if (tone.chordID == Constant.CHORD_ID_MINOR) {
+            textureSheetAnimation.rowIndex = 1;
+        }
+        else if (tone.chordID == Constant.CHORD_ID_DIMINISHED || tone.chordID == Constant.CHORD_ID_AUGMENTED) {
+        }
+        // Other => Normal Star
+        else {
+            textureSheetAnimation.rowIndex = 0;
+        }
 
         // Emit
         var count = particleSystem.emission.GetBurst(0).count.constant;

@@ -90,13 +90,13 @@ ScriptsOnlyBuild:
     - Class: 114
       Script: {instanceID: 11492}
     - Class: 114
-      Script: {instanceID: 11618}
+      Script: {instanceID: 11620}
     - Class: 114
-      Script: {instanceID: 11630}
+      Script: {instanceID: 11632}
     - Class: 114
-      Script: {instanceID: 11644}
+      Script: {instanceID: 11646}
     - Class: 114
-      Script: {instanceID: 11664}
+      Script: {instanceID: 11666}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -402,7 +402,7 @@ ScriptsOnlyBuild:
     className: WaypointProgressTracker
   - hash:
       serializedVersion: 2
-      Hash: 618a490712ca9c497286c498875c3990
+      Hash: 7a5482f2e2f03cec0818a0374752725a
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: Fireworks
@@ -720,7 +720,7 @@ ScriptsOnlyBuild:
     className: FreeLookCam
   - hash:
       serializedVersion: 2
-      Hash: e50aa6b2c1086e6125f5c3e60191a85b
+      Hash: d3da1b48906f949127b5d6907089801e
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: Rising
@@ -786,7 +786,7 @@ ScriptsOnlyBuild:
     className: Water
   - hash:
       serializedVersion: 2
-      Hash: 961c62c03a827ca408ad8edd399fb074
+      Hash: 2c06091f3ace9cbaf5b56bc210e75b9c
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: GameManager
@@ -870,7 +870,7 @@ ScriptsOnlyBuild:
     className: JetParticleEffect
   - hash:
       serializedVersion: 2
-      Hash: 71bb6a6b6c8f052f948db64c7dd3ca4f
+      Hash: dca00438540fa0874a2b3eb87f831f55
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: Star
@@ -1014,10 +1014,16 @@ ScriptsOnlyBuild:
     className: WaterTile
   - hash:
       serializedVersion: 2
-      Hash: 6f105bf42939ce88ca0d91f4da76937b
+      Hash: a7c81c2b2014cbec8e65b68989ca4640
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: MyAudioSource
+  - hash:
+      serializedVersion: 2
+      Hash: 276f6b9b40f2fa9f3c4413b6fe924390
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: GradientColors
   - hash:
       serializedVersion: 2
       Hash: df434544c9f7b33d1cc7e635b180d279
@@ -1129,4 +1135,4 @@ ScriptsOnlyBuild:
   platform: 19
   scenePathNames:
   - Assets/Scenes/Fireworks.unity
-  playerPath: D:/Unity/VoiPaFireworks/VoiPaFireworks1.1.2/VoiPaFireworks.exe
+  playerPath: D:/Unity/VoiPaFireworks/VoiPaFireworks1.1.4/VoiPaFireworks.exe

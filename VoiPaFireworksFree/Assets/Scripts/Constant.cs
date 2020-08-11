@@ -21,11 +21,19 @@ public class Constant{
     public const string CHORD_ID_MINORMAJOR = "mim";
     public const string CHORD_ID_HALFDIMINISHED = "hal";
 
+    // CHORD PROGRESSION ID
+    public const string CHORD_PROGRESSION_ID_NONE = "non";
+    public const string CHORD_PROGRESSION_ID_I_IIM_IIIM_IV = "I_IIm_IIIm_IV";
+    public const string CHORD_PROGRESSION_ID_I_VIM_IIM_V = "I_VIm_IIm_V";
+    public const string CHORD_PROGRESSION_ID_IV_V_IIIM_VIM = "IV_V_IIIm_VIm";
+    public const string CHORD_PROGRESSION_ID_IV_I_V_VIM = "IV_I_V_VIm";
+
     /* Fireworks */
     // Fireworks Type
     public const string FIREWORKS_RISING_TYPE_NORMAL = "Normal";
     public const string FIREWORKS_RISING_TYPE_SPARSE = "Sparse";
     public const string FIREWORKS_RISING_TYPE_SENRIN = "Senrin";
+    public const string FIREWORKS_RISING_TYPE_POKA = "Poka";
 
     // Fireworks Star ID
     // Normal Stars
@@ -47,6 +55,12 @@ public class Constant{
     public const string FIREWORKS_STAR_ID_HACHI_SENRIN = "HachiSenrin";
     public const string FIREWORKS_STAR_ID_KAMURO_SENRIN = "KamuroSenrin";
     public const string FIREWORKS_STAR_ID_YANAGI_SENRIN = "YanagiSenrin";
+    // Poka Stars
+    public const string FIREWORKS_STAR_ID_BOTAN_POKA = "BotanPoka";
+    public const string FIREWORKS_STAR_ID_KIKU_POKA = "KikuPoka";
+    public const string FIREWORKS_STAR_ID_YASHI_POKA = "YashiPoka";
+    public const string FIREWORKS_STAR_ID_KAMURO_POKA = "KamuroPoka";
+    public const string FIREWORKS_STAR_ID_YANAGI_POKA = "YanagiPoka";
     // Shaped Stars
     public const string FIREWORKS_STAR_ID_MIRAI = "Mirai";
     // Ground Stars
@@ -83,6 +97,12 @@ public class Constant{
     public const string TAG_KAMUROSENRIN_STANBY = "KamuroSenrinStanby";
     public const string TAG_YANAGISENRIN_STANBY = "YanagiSenrinStanby";
     public const string TAG_HACHISENRIN_STANBY = "HachiSenrinStanby";
+    // Poka Star Stanby Tag
+    public const string TAG_BOTAN_POKA_STAR_STANBY = "BotanPokaStarStanby";
+    public const string TAG_KIKU_POKA_STAR_STANBY = "KikuPokaStarStanby";
+    public const string TAG_YASHI_POKA_STAR_STANBY = "YashiPokaStarStanby";
+    public const string TAG_KAMURO_POKA_STAR_STANBY = "KamuroPokaStarStanby";
+    public const string TAG_YANAGI_POKA_STAR_STANBY = "YanagiPokaStarStanby";
     // Shaped Star Stanby Tag
     public const string TAG_MIRAI_STAR_STANBY = "MiraiStarStanby";
     // Ground Star Stanby Tag

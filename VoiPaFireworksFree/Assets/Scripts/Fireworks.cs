@@ -35,13 +35,14 @@ public class Fireworks : MonoBehaviour{
     public float SizeToVelocityPowerMultiplier = 0.5f;
     public float ShootingWidth = 300.0f;
     public float LowRangeFreqMaxHz = 261.0f;
+    public float QuietRMSMax = 0.05f;
     public float GroundStarEffectCoefficient = 1.5f;
     public float SenrinStarEffectCoefficient = 1.0f;
     // Private
     private GameObject obj;
     private List<Tone> toneList;
     private float GroundStarVolumeThreshold = 0.75f;
-    private float SenrinStarVolumeThreshold = 0.5f;
+    private float SenrinStarVolumeThreshold = 0.2f;
 
     // Start is called before the first frame update
     void Start(){
@@ -54,7 +55,12 @@ public class Fireworks : MonoBehaviour{
     }
 
     // Rising Fireworks
-    public void shootRisingNew(List<Tone> tone_list, float rms = 0.0f) {
+    public void shootRising(List<Tone> tone_list, float rms = 0.0f) {
+        // Tone List check
+        if (!tone_list.Any()) {
+            return;
+        }
+
         // Copy tone
         toneList = new List<Tone>();
         foreach (Tone tone in tone_list) {
@@ -88,11 +94,15 @@ public class Fireworks : MonoBehaviour{
             float volumeCurrent = countCurrent * rms;
 
             // Fireworks Type
-            // Normal : 
+            // Normal : Default Fireworks Type 
             string type = Constant.FIREWORKS_RISING_TYPE_NORMAL;
-            // Senrin : 
+            // Senrin : Laud Situatiion
             if (volumeCurrent > SenrinStarVolumeThreshold) {
                 type = Constant.FIREWORKS_RISING_TYPE_SENRIN;
+            }
+            // Poka : Quiet Situation
+            else if (rms < QuietRMSMax) {
+                type = Constant.FIREWORKS_RISING_TYPE_POKA;
             }
 
             // Rising by Chord
@@ -103,7 +113,7 @@ public class Fireworks : MonoBehaviour{
                 int refToneNumber = chords[j].Key;
                 float refToneFrequency = myAudioAnalyzer.ToneNumber2Frequency(refToneNumber);
                 // Low Range : Change Type to Sparse
-                if (type != Constant.FIREWORKS_RISING_TYPE_SENRIN && refToneFrequency < LowRangeFreqMaxHz) {
+                if (type == Constant.FIREWORKS_RISING_TYPE_NORMAL && refToneFrequency < LowRangeFreqMaxHz) {
                     type = Constant.FIREWORKS_RISING_TYPE_SPARSE;
                 }
 
@@ -162,7 +172,7 @@ public class Fireworks : MonoBehaviour{
     }
 
     // Ground Effect Fireworks
-    public void shootGroundEffectNew(List<Tone> tone_list, float rms = 0.0f) {
+    public void shootGroundEffect(List<Tone> tone_list, float rms = 0.0f) {
         // Tone Volume
         int toneCountCurrent = tone_list.Count();
         float toneVolume = (float)toneCountCurrent * rms;

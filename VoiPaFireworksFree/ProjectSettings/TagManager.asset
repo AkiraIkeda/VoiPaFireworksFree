@@ -31,6 +31,11 @@ TagManager:
   - KamuroSparseStarStanby
   - YanagiSparseStarStanby
   - FireworksUpdating
+  - BotanPokaStarStanby
+  - KikuPokaStarStanby
+  - YashiPokaStarStanby
+  - KamuroPokaStarStanby
+  - YanagiPokaStarStanby
   layers:
   - Default
   - TransparentFX

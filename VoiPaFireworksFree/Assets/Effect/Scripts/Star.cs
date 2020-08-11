@@ -69,6 +69,22 @@ public class Star : MonoBehaviour{
             case Constant.FIREWORKS_STAR_ID_HACHI_SENRIN:
                 this.gameObject.tag = Constant.TAG_HACHISENRIN_STANBY;
                 break;
+            // Poka Stars
+            case Constant.FIREWORKS_STAR_ID_BOTAN_POKA:
+                this.gameObject.tag = Constant.TAG_BOTAN_POKA_STAR_STANBY;
+                break;
+            case Constant.FIREWORKS_STAR_ID_KIKU_POKA:
+                this.gameObject.tag = Constant.TAG_KIKU_POKA_STAR_STANBY;
+                break;
+            case Constant.FIREWORKS_STAR_ID_YASHI_POKA:
+                this.gameObject.tag = Constant.TAG_YASHI_POKA_STAR_STANBY;
+                break;
+            case Constant.FIREWORKS_STAR_ID_KAMURO_POKA:
+                this.gameObject.tag = Constant.TAG_KAMURO_POKA_STAR_STANBY;
+                break;
+            case Constant.FIREWORKS_STAR_ID_YANAGI_POKA:
+                this.gameObject.tag = Constant.TAG_YANAGI_POKA_STAR_STANBY;
+                break;
             // Shaped Stars
             case Constant.FIREWORKS_STAR_ID_MIRAI:
                 this.gameObject.tag = Constant.TAG_MIRAI_STAR_STANBY;
