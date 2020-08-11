@@ -4,46 +4,38 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - RisingUpdating
   - RisingStanby
   - BotanStarStanby
-  - BotanStarUpdating
   - KikuStarStanby
-  - KikuStarUpdating
   - KamuroStarStanby
-  - KamuroStarUpdating
   - YanagiStarStanby
-  - YanagiStarUpdating
   - YashiStarStanby
-  - YashiStarUpdating
   - ToraStarStanby
-  - ToraStarUpdating
   - RandamaStarStanby
-  - RandamaStarUpdating
   - SazanamiStarStanby
-  - SazanamiStarUpdating
   - KikuToraStarStanby
-  - KikuToraStarUpdating
   - HiyuStarStanby
-  - HiyuStarUpdating
   - SenrinStarStanby
-  - SenrinStarUpdating
   - VToraStarStanby
-  - VToraStarUpdating
   - YashiToraStarStanby
-  - YashiToraStarUpdating
   - BotanSenrinStanby
-  - BotanSenrinUpdating
   - KikuSenrinStanby
-  - KikuSenrinUpdating
   - YashiSenrinStanby
-  - YashiSenrinUpdating
   - KamuroSenrinStanby
-  - KamuroSenrinUpdating
   - HachiSenrinStanby
-  - HachiSenrinUpdating
   - YanagiSenrinStanby
-  - YanagiSenrinUpdating
+  - MiraiStarStanby
+  - BotanSparseStarStanby
+  - KikuSparseStarStanby
+  - YashiSparseStarStanby
+  - KamuroSparseStarStanby
+  - YanagiSparseStarStanby
+  - FireworksUpdating
+  - BotanPokaStarStanby
+  - KikuPokaStarStanby
+  - YashiPokaStarStanby
+  - KamuroPokaStarStanby
+  - YanagiPokaStarStanby
   layers:
   - Default
   - TransparentFX

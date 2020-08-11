@@ -6,6 +6,9 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class GameManager : Singleton<GameManager>{
+    // FPS
+    public int targetFPS = 60;
+
     // Camera
     public GameObject MainCamera;
 
@@ -42,6 +45,9 @@ public class GameManager : Singleton<GameManager>{
 
     // Start is called before the first frame update
     void Start(){
+        // FPS
+        Application.targetFrameRate = targetFPS;
+
         // All UI
         allUI = new GameObject[] { SettingUI, AudioSpectrumUI, AdvancedSettingUI, FireworksUI, QuitUI };
 

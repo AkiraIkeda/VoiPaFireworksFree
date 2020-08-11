@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using UnityEngine;
 
@@ -7,7 +8,14 @@ public class MyAudioAnalyzer : MonoBehaviour{
     /* Properties */
     public Constant Constant;
 
-    // Get Chord Method
+    // Convert Tone Number to Frequency
+    public float ToneNumber2Frequency(int tone_number, float a4_hz = 442.0f) {
+        float mult = (tone_number - 69) / 12;
+        float freq = a4_hz * Mathf.Pow(2.0f, mult);
+        return freq;
+    }
+
+    // Get Chord Tuple in Tone Arrays
     public Tuple<int, int, string>[] GetChordArray(int[] tone_array) {
         // No Tone Array
         if (!tone_array.Any()) {
@@ -141,7 +149,7 @@ public class MyAudioAnalyzer : MonoBehaviour{
         }return chord_array;
     }
 
-    // Get Main Chord
+    // Get Main Chord in Tone List
     public static string[] GetMainChords(List<Tone> tone_list){
         var toneChordCountList = tone_list
             .GroupBy(x => x.chordID)
@@ -151,7 +159,142 @@ public class MyAudioAnalyzer : MonoBehaviour{
         return toneChordArray;
     }
 
-    // Get Main Tone Number
+    // Get Main Chord Tone
+    public static Tone GetMainChordTone(List<Tone> tone_list) {
+        // Main Tone
+        Tone mainTone = null;
+        // Tone List that chord ID is not None
+        var toneList = tone_list.Where(x => x.chordID != Constant.CHORD_ID_NONE).ToList();
+        // If No Tone use Default tone list 
+        if (toneList.Count() == 0) {
+            return mainTone;
+        }
+
+        // ToneList Grouped by Count
+        var toneChordCountList = toneList
+            .GroupBy(x => x.chordID)
+            .Select(x => new { id = x.Key, count = x.Count() }).ToList();
+        // Count Max of Tones
+        int countMax = toneChordCountList.Select(x => x.count).Max();
+        var toneChordArray = toneChordCountList.Where(x => x.count == countMax).Select(x => x.id).ToArray();
+
+        // Main Tone List
+        List<Tone> mainToneList = new List<Tone>(); 
+        foreach (string chordID in toneChordArray){
+            // Search the Tone of Main Chord
+            var chordToneList = toneList.Where(x => x.chordID == chordID);
+            // The Lowest Tone is Main Chord Tone
+            int minNumber = chordToneList.Select(x => x.number).Min();
+            var mainToneTemp = toneList.Where(x => x.number == minNumber).ToArray()[0];
+            // Add Main tone
+            mainToneList.Add(mainToneTemp);
+        }
+
+        // If there are seberal main tones, The Volume Higher is the Main tone
+        float maxVolume = mainToneList.Select(x => x.volume).Max();
+        mainTone = mainToneList.Where(x => x.volume == maxVolume).ToArray()[0];
+
+        return mainTone;
+    }
+
+    // Get Chord Progression
+    public static string GetChordProgression(List<Tone> chord_tone_list) {
+        // Chord Progression ID
+        string chordProgressionID = Constant.CHORD_PROGRESSION_ID_NONE;
+        // Check ChordToneList Length = > Return None
+        if (chord_tone_list.Count() < 4) {
+            return chordProgressionID;
+        }
+        // Create Tone Difference List
+        List<int> toneDiffList = new List<int>();
+        for (int i = 0; i < chord_tone_list.Count; i++) {
+            // Difference number with first tone
+            int diff = (chord_tone_list[i].number - chord_tone_list[0].number) % 12;
+            if (diff < 0) {
+                diff += 12;
+            }
+            // Add difference List
+            toneDiffList.Add(diff);
+        }
+        // Search Chord Progression
+        // Second Tone
+        switch (toneDiffList[1]) {
+            // II
+            case 2:
+                switch (toneDiffList[2]) {
+                    // III
+                    case 4:
+                        switch (toneDiffList[3]) {
+                            // IV
+                            case 5:
+                                // I-II-III-IV
+                                chordProgressionID = Constant.CHORD_PROGRESSION_ID_I_IIM_IIIM_IV;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    // VII
+                    case 11:
+                        switch (toneDiffList[3]) {
+                            // I
+                            case 0:
+                                // I-II-VI-I (IV-V-III-IV)
+                                chordProgressionID = Constant.CHORD_PROGRESSION_ID_IV_V_IIIM_VIM;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            // V
+            case 7:
+                switch (toneDiffList[2]) {
+                    // II
+                    case 2:
+                        switch (toneDiffList[3]) {
+                            // III
+                            case 4:
+                                // I-V-II-III (IV-I-V-VI)
+                                chordProgressionID = Constant.CHORD_PROGRESSION_ID_IV_I_V_VIM;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            // VI
+            case 9:
+                switch (toneDiffList[2]) {
+                    // II
+                    case 2:
+                        switch (toneDiffList[3]) {
+                            // V
+                            case 7:
+                                // I-VI-II-V
+                                chordProgressionID = Constant.CHORD_PROGRESSION_ID_I_VIM_IIM_V;
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            default:
+                break;
+        }
+        return chordProgressionID;
+    }
+
+    // Get Main Tone Number in Tone List
     public static int[] GetMainToneNumbers(List<Tone> tone_list){
         var toneNumberCountList = tone_list
             .GroupBy(x => x.number % 12)
