@@ -38,6 +38,7 @@ public class Fireworks : MonoBehaviour{
     public float QuietRMSMax = 0.05f;
     public float GroundStarEffectCoefficient = 1.5f;
     public float SenrinStarEffectCoefficient = 1.0f;
+    public int SenrinStarCountMin = 5;
     // Private
     private GameObject obj;
     private List<Tone> toneList;
@@ -75,29 +76,27 @@ public class Fireworks : MonoBehaviour{
         // Chord List : Grouped by Chord
         var chordlist = toneList.GroupBy(x => x.chordRef).ToList();
 
-        // Volume List : Grouped by Volume
-        var volumeList = toneList.GroupBy(x => (int)(x.volume * FireworksSizeMax)).ToList();
-
         // Volume Chord List : Grouped by Volume & Chord
         var volumeChordList = chordlist.GroupBy(x => (int)(x.ToList().Select(y => y.volume).Max() * FireworksSizeMax)).ToList();
 
         // Shoot the Rising
         for (int i = 0; i < volumeChordList.Count(); i++) {
-            // Rising Chords by Volume
+            // Chords in this Volume
             var chords = volumeChordList[i].ToList();
 
-            // Tone Count Max by Volume
-            float toneCountValue = (float)volumeList[i].ToList().Select(x => x.count).Max();
+            // Tone Count Max in this Volume
+            int volumeKey = volumeChordList[i].Key;
+            float toneCountMax = toneList.Where(x => (int)(x.volume * FireworksSizeMax) == volumeKey).Select(x => x.count).Max();
 
-            // Volume by Pitch
-            int countCurrent = volumeList[i].ToList().Count();
+            // Volume : RMS * Count of Tones in this volume
+            int countCurrent = chords.Count();
             float volumeCurrent = countCurrent * rms;
 
             // Fireworks Type
             // Normal : Default Fireworks Type 
             string type = Constant.FIREWORKS_RISING_TYPE_NORMAL;
             // Senrin : Laud Situatiion
-            if (volumeCurrent > SenrinStarVolumeThreshold) {
+            if (volumeCurrent > SenrinStarVolumeThreshold && countCurrent >= SenrinStarCountMin) {
                 type = Constant.FIREWORKS_RISING_TYPE_SENRIN;
             }
             // Poka : Quiet Situation
@@ -108,15 +107,6 @@ public class Fireworks : MonoBehaviour{
             // Rising by Chord
             for (int j = 0; j < chords.Count; j++) {
                 var tones = chords[j].ToList();
-
-                // Reference Tone Frequency
-                int refToneNumber = chords[j].Key;
-                float refToneFrequency = myAudioAnalyzer.ToneNumber2Frequency(refToneNumber);
-                // Low Range : Change Type to Sparse
-                if (type == Constant.FIREWORKS_RISING_TYPE_NORMAL && refToneFrequency < LowRangeFreqMaxHz) {
-                    type = Constant.FIREWORKS_RISING_TYPE_SPARSE;
-                }
-
                 // Max Volume in this Chord
                 float volumeMax = tones.Select(x => x.volume).Max();
 
@@ -130,14 +120,12 @@ public class Fireworks : MonoBehaviour{
                 if (obj == null) {
                     obj = Instantiate(RisingPrefab, position, Quaternion.identity, RisingObjects.transform);
                 }
-                else {
-                    var transform = obj.GetComponent<Transform>();
-                    transform.position = position;
-                    transform.rotation = Quaternion.identity;
-                }
-
                 // Change Rising Tag Updating
                 obj.tag = Constant.TAG_FIREWORKS_UPDATING;
+
+                var transform = obj.GetComponent<Transform>();
+                transform.position = position;
+                transform.rotation = Quaternion.identity;
 
                 // Rising Init
                 // Get Rising Component
@@ -154,7 +142,7 @@ public class Fireworks : MonoBehaviour{
                 }
 
                 // Tone Count Mean
-                rising.ToneCountValue = toneCountValue;
+                rising.ToneCountValue = toneCountMax;
 
                 // Color Blending
                 rising.ColorBlending = colorBlending;
@@ -175,7 +163,7 @@ public class Fireworks : MonoBehaviour{
     public void shootGroundEffect(List<Tone> tone_list, float rms = 0.0f) {
         // Tone Volume
         int toneCountCurrent = tone_list.Count();
-        float toneVolume = (float)toneCountCurrent * rms;
+        float toneVolume = toneCountCurrent * rms;
 
         // Check Shooting Threshold
         if (toneVolume < GroundStarVolumeThreshold) {

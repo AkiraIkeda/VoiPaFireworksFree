@@ -316,9 +316,8 @@ public class MyAudioSource : MonoBehaviour{
                     }
                     */
 
-                    // RMS : Mean and SD
+                    // RMS Mean
                     rmsMeanCurrent = rmsBuffer.Average();
-                    rmsSDCurrent = SD(rmsBuffer.ToArray());
 
                     // Shoot Fireworks!!!
                     // Shoot Rising Stars

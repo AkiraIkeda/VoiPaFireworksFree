@@ -48,6 +48,37 @@ public class Constant{
     public const string FIREWORKS_STAR_ID_YASHI_SPARSE = "YashiSparse";
     public const string FIREWORKS_STAR_ID_KAMURO_SPARSE = "KamuroSparse";
     public const string FIREWORKS_STAR_ID_YANAGI_SPARSE = "YanagiSparse";
+    // Stars
+    // Dim 1
+    public const string FIREWORKS_STAR_ID_BOTAN_1 = "Botan1";
+    public const string FIREWORKS_STAR_ID_KIKU_1 = "Kiku1";
+    public const string FIREWORKS_STAR_ID_YASHI_1 = "Yashi1";
+    public const string FIREWORKS_STAR_ID_KAMURO_1 = "Kamuro1";
+    public const string FIREWORKS_STAR_ID_YANAGI_1 = "Yanagi1";
+    // Dim 2
+    public const string FIREWORKS_STAR_ID_BOTAN_2 = "Botan2";
+    public const string FIREWORKS_STAR_ID_KIKU_2 = "Kiku2";
+    public const string FIREWORKS_STAR_ID_YASHI_2 = "Yashi2";
+    public const string FIREWORKS_STAR_ID_KAMURO_2 = "Kamuro2";
+    public const string FIREWORKS_STAR_ID_YANAGI_2 = "Yanagi2";
+    // Dim 3
+    public const string FIREWORKS_STAR_ID_BOTAN_3 = "Botan3";
+    public const string FIREWORKS_STAR_ID_KIKU_3 = "Kiku3";
+    public const string FIREWORKS_STAR_ID_YASHI_3 = "Yashi3";
+    public const string FIREWORKS_STAR_ID_KAMURO_3 = "Kamuro3";
+    public const string FIREWORKS_STAR_ID_YANAGI_3 = "Yanagi3";
+    // Dim 4
+    public const string FIREWORKS_STAR_ID_BOTAN_4 = "Botan4";
+    public const string FIREWORKS_STAR_ID_KIKU_4 = "Kiku4";
+    public const string FIREWORKS_STAR_ID_YASHI_4 = "Yashi4";
+    public const string FIREWORKS_STAR_ID_KAMURO_4 = "Kamuro4";
+    public const string FIREWORKS_STAR_ID_YANAGI_4 = "Yanagi4";
+    // Dim 5
+    public const string FIREWORKS_STAR_ID_BOTAN_5 = "Botan5";
+    public const string FIREWORKS_STAR_ID_KIKU_5 = "Kiku5";
+    public const string FIREWORKS_STAR_ID_YASHI_5 = "Yashi5";
+    public const string FIREWORKS_STAR_ID_KAMURO_5 = "Kamuro5";
+    public const string FIREWORKS_STAR_ID_YANAGI_5 = "Yanagi5";
     // Senrin Stars
     public const string FIREWORKS_STAR_ID_BOTAN_SENRIN = "BotanSenrin";
     public const string FIREWORKS_STAR_ID_KIKU_SENRIN = "KikuSenrin";
