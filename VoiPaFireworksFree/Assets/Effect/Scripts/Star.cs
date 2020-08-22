@@ -50,6 +50,86 @@ public class Star : MonoBehaviour{
             case Constant.FIREWORKS_STAR_ID_YANAGI_SPARSE:
                 this.gameObject.tag = Constant.TAG_YANAGI_SPARSE_STAR_STANBY;
                 break;
+            // Botan Stars
+            case Constant.FIREWORKS_STAR_ID_BOTAN_1:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_BOTAN_2:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_BOTAN_3:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_BOTAN_4:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_BOTAN_5:
+                this.gameObject.tag = ID;
+                break;
+            // Kiku Stars
+            case Constant.FIREWORKS_STAR_ID_KIKU_1:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_KIKU_2:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_KIKU_3:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_KIKU_4:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_KIKU_5:
+                this.gameObject.tag = ID;
+                break;
+            // Yashi Stars
+            case Constant.FIREWORKS_STAR_ID_YASHI_1:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_YASHI_2:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_YASHI_3:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_YASHI_4:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_YASHI_5:
+                this.gameObject.tag = ID;
+                break;
+            // Kamuro
+            case Constant.FIREWORKS_STAR_ID_KAMURO_1:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_KAMURO_2:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_KAMURO_3:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_KAMURO_4:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_KAMURO_5:
+                this.gameObject.tag = ID;
+                break;
+            // Yanagi
+            case Constant.FIREWORKS_STAR_ID_YANAGI_1:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_YANAGI_2:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_YANAGI_3:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_YANAGI_4:
+                this.gameObject.tag = ID;
+                break;
+            case Constant.FIREWORKS_STAR_ID_YANAGI_5:
+                this.gameObject.tag = ID;
+                break;
             // Senrin Stars
             case Constant.FIREWORKS_STAR_ID_BOTAN_SENRIN:
                 this.gameObject.tag = Constant.TAG_BOTANSENRIN_STANBY;
@@ -114,6 +194,7 @@ public class Star : MonoBehaviour{
             case Constant.FIREWORKS_STAR_ID_RANDAMA:
                 this.gameObject.tag = Constant.TAG_RANDAMA_STAR_STANBY;
                 break;
+            // Error
             default:
                 Debug.Log("Error : This ID is not in the Constant.FIREWORKS_ID :" + ID);
                 break;

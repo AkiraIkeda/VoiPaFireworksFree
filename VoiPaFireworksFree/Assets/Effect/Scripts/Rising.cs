@@ -8,18 +8,37 @@ public class Rising : MonoBehaviour{
     /* Properties */
     // GameObjects
     public GameObject StarObjects;
-    // Normal Stars
-    public GameObject BotanStar;
-    public GameObject KikuStar;
-    public GameObject YashiStar;
-    public GameObject KamuroStar;
-    public GameObject YnaagiStar;
-    // Sparse Stars
-    public GameObject BotanSparseStar;
-    public GameObject KikuSparseStar;
-    public GameObject YashiSparseStar;
-    public GameObject KamuroSparseStar;
-    public GameObject YanagiSparseStar;
+    // Stars
+    // Dim 1
+    public GameObject BotanStar1;
+    public GameObject KikuStar1;
+    public GameObject YashiStar1;
+    public GameObject KamuroStar1;
+    public GameObject YanagiStar1;
+    // Dim 2
+    public GameObject BotanStar2;
+    public GameObject KikuStar2;
+    public GameObject YashiStar2;
+    public GameObject KamuroStar2;
+    public GameObject YanagiStar2;
+    // Dim 3
+    public GameObject BotanStar3;
+    public GameObject KikuStar3;
+    public GameObject YashiStar3;
+    public GameObject KamuroStar3;
+    public GameObject YanagiStar3;
+    // Dim 4
+    public GameObject BotanStar4;
+    public GameObject KikuStar4;
+    public GameObject YashiStar4;
+    public GameObject KamuroStar4;
+    public GameObject YanagiStar4;
+    // Dim 5
+    public GameObject BotanStar5;
+    public GameObject KikuStar5;
+    public GameObject YashiStar5;
+    public GameObject KamuroStar5;
+    public GameObject YanagiStar5;
     // Senrin Stars
     public GameObject BotanSenrinStar;
     public GameObject KikuSenrinStar;
@@ -41,9 +60,15 @@ public class Rising : MonoBehaviour{
     public float SpeedCoefficient = 120.0f;
     public float SpeedMin = 20.0f;
     public float SpeedMax = 50.0f;
+    public float StartSizeCoefficient = 3;
     public float ColorBlending = 0.33f;
     // Individual Setting Parameter
     public float PokaStarSpeedCoefficient = 0.25f;
+    // Tone Number Range : MIDI Note Number 
+    public int ToneNumberRange1Max = 47;
+    public int ToneNumberRange2Max = 59;
+    public int ToneNumberRange3Max = 71;
+    public int ToneNumberRange4Max = 83;
     // Externally Accesable Parameter
     public List<Tone> ToneList = new List<Tone>();
     public float ToneCountValue = 0f;
@@ -56,8 +81,17 @@ public class Rising : MonoBehaviour{
 
     // Start is called before the first frame update
     void Start(){
+        // Get Particle
         _particleSystem = this.gameObject.GetComponent<ParticleSystem>();
         particles = new ParticleSystem.Particle[_particleSystem.emission.burstCount];
+        // Change Rising Parameter
+        if (ToneList.Any()) {
+            // Size
+            float volumeMax = ToneList.Select(x => x.volume).Max();
+            float startSize = volumeMax * StartSizeCoefficient;
+            var main = _particleSystem.main;
+            main.startSize = new ParticleSystem.MinMaxCurve(startSize, startSize * 1.2f);
+        }
     }
 
     // Update is called once per frame
@@ -72,12 +106,13 @@ public class Rising : MonoBehaviour{
             // Open Fireworks !!!
             if (!isOpend && ToneList.Any() && velocity_y < 0) {
                 // Ref Speed from Volume
-                float volume = ToneList.Select(x => x.volume).Max();
-                float speedRef = SpeedCoefficient * volume;
+                float volumeMax = ToneList.Select(x => x.volume).Max();
+                float speedRef = SpeedCoefficient * volumeMax;
                 // Mean Count
                 int countMean = (int)ToneList.Select(x => x.count).Average();
-                // This Tone's Stars
+                // Open This Tone's Stars
                 for (int i = 0; i < ToneList.Count; i++) {
+                    // Speed
                     float speed = speedRef * (float)(i + 1) / (float)(ToneList.Count);
                     speed = Mathf.Clamp(speed, SpeedMin, SpeedMax);
                     // Open by Type
@@ -85,10 +120,6 @@ public class Rising : MonoBehaviour{
                         // Normal
                         case Constant.FIREWORKS_RISING_TYPE_NORMAL:
                             Open(position, ToneList[i], speed);
-                            break;
-                        // Sparese
-                        case Constant.FIREWORKS_RISING_TYPE_SPARSE:
-                            OpenSparse(position, ToneList[i], speed);
                             break;
                         // Senrin
                         case Constant.FIREWORKS_RISING_TYPE_SENRIN:
@@ -103,6 +134,13 @@ public class Rising : MonoBehaviour{
                             break;
                     }
                 }
+                // Opend
+                isOpend = true;
+
+                // Stop this Rising
+                _particleSystem.Clear();
+                _particleSystem.Stop();
+                gameObject.tag = Constant.TAG_RISING_STANBY;
             }
         }
     }
@@ -123,37 +161,198 @@ public class Rising : MonoBehaviour{
     void Open(Vector3 position, Tone tone, float startSpeed) {
         // Instantiate Star
         GameObject obj = null;
-        // Star :  by Tone Count
+        // Star Type by Tone Count and Number
+        // Botan Star
        if (tone.count < 10){
-            // First Search Stanby Star
-            obj = GameObject.FindGameObjectWithTag(Constant.TAG_BOTAN_STAR_STANBY);
-            if (obj == null) {
-                // Instantiate New Star
-                obj = GameObject.Instantiate(BotanStar, position, Quaternion.identity, StarObjects.transform);
+            // Tone Number Range 1
+            if (tone.number <= ToneNumberRange1Max) {
+                // First Search Stanby Star
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_BOTAN_1);
+                if (obj == null) {
+                    // Instantiate New Star
+                    obj = GameObject.Instantiate(BotanStar1, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 2
+            else if (tone.number <= ToneNumberRange2Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_BOTAN_2);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(BotanStar2, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 3
+            else if (tone.number <= ToneNumberRange3Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_BOTAN_3);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(BotanStar3, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 4
+            else if (tone.number <= ToneNumberRange4Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_BOTAN_4);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(BotanStar4, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 5
+            else {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_BOTAN_5);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(BotanStar5, position, Quaternion.identity, StarObjects.transform);
+                }
             }
         }
+       // Kiku Star
         else if (tone.count < 20){
-            obj = GameObject.FindGameObjectWithTag(Constant.TAG_KIKU_STAR_STANBY);
-            if (obj == null) {
-                obj = GameObject.Instantiate(KikuStar, position, Quaternion.identity, StarObjects.transform);
+            // Tone Number Range 1
+            if (tone.number <= ToneNumberRange1Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_KIKU_1);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(KikuStar1, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 2
+            else if (tone.number <= ToneNumberRange2Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_KIKU_2);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(KikuStar2, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 3
+            else if (tone.number <= ToneNumberRange3Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_KIKU_3);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(KikuStar3, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 4
+            else if (tone.number <= ToneNumberRange4Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_KIKU_4);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(KikuStar4, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 5
+            else {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_KIKU_5);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(KikuStar5, position, Quaternion.identity, StarObjects.transform);
+                }
             }
         }
+       // Yashi Star
         else if (tone.count < 30){
-            obj = GameObject.FindGameObjectWithTag(Constant.TAG_YASHI_STAR_STANBY);
-            if (obj == null){
-                obj = GameObject.Instantiate(YashiStar, position, Quaternion.identity, StarObjects.transform);
+            // Tone Number Range 1
+            if (tone.number <= ToneNumberRange1Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_YASHI_1);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(YashiStar1, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 2
+            else if (tone.number <= ToneNumberRange2Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_YASHI_2);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(YashiStar2, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 3
+            else if (tone.number <= ToneNumberRange3Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_YASHI_3);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(YashiStar3, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 4
+            else if (tone.number <= ToneNumberRange4Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_YASHI_4);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(YashiStar4, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 5
+            else {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_YASHI_5);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(YashiStar5, position, Quaternion.identity, StarObjects.transform);
+                }
             }
         }
+       // Kamuro Star
         else if(tone.count < 40) {
-            obj = GameObject.FindGameObjectWithTag(Constant.TAG_KAMURO_STAR_STANBY);
-            if (obj == null) {
-                obj = GameObject.Instantiate(KamuroStar, position, Quaternion.identity, StarObjects.transform);
+            // Tone Number Range 1
+            if (tone.number <= ToneNumberRange1Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_KAMURO_1);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(KamuroStar1, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 2
+            else if (tone.number <= ToneNumberRange2Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_KAMURO_2);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(KamuroStar2, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 3
+            else if (tone.number <= ToneNumberRange3Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_KAMURO_3);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(KamuroStar3, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 4
+            else if (tone.number <= ToneNumberRange4Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_KAMURO_4);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(KamuroStar4, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 5
+            else {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_KAMURO_5);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(KamuroStar5, position, Quaternion.identity, StarObjects.transform);
+                }
             }
         }
+       // Yanagi Star
         else {
             obj = GameObject.FindGameObjectWithTag(Constant.TAG_YANAGI_STAR_STANBY);
-            if (obj == null) {
-                obj = GameObject.Instantiate(YnaagiStar, position, Quaternion.identity, StarObjects.transform);
+            // Tone Number Range 1
+            if (tone.number <= ToneNumberRange1Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_YANAGI_1);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(YanagiStar1, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 2
+            else if (tone.number <= ToneNumberRange2Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_YANAGI_2);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(YanagiStar2, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 3
+            else if (tone.number <= ToneNumberRange3Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_YANAGI_3);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(YanagiStar3, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 4
+            else if (tone.number <= ToneNumberRange4Max) {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_YANAGI_4);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(YanagiStar4, position, Quaternion.identity, StarObjects.transform);
+                }
+            }
+            // Tone Number Range 5
+            else {
+                obj = GameObject.FindGameObjectWithTag(Constant.FIREWORKS_STAR_ID_YANAGI_5);
+                if (obj == null) {
+                    obj = GameObject.Instantiate(YanagiStar5, position, Quaternion.identity, StarObjects.transform);
+                }
             }
         }
         // Change Tag to Updating
@@ -184,110 +383,15 @@ public class Rising : MonoBehaviour{
         // Minor => Sazanami
         if (tone.chordID == Constant.CHORD_ID_MINOR) {
             textureSheetAnimation.rowIndex = 1;
-        }else if(tone.chordID == Constant.CHORD_ID_DIMINISHED || tone.chordID == Constant.CHORD_ID_AUGMENTED){
         }
         // Other => Normal Star
         else {
             textureSheetAnimation.rowIndex = 0;
         }
 
-        // Emit
+        // Emit Particle
         var count = particleSystem.emission.GetBurst(0).count.constant;
         particleSystem.Emit((int)count);
-
-        // Opend
-        isOpend = true;
-
-        // Stop this Rising
-        _particleSystem.Clear();
-        _particleSystem.Stop();
-        _particleSystem.tag = Constant.TAG_RISING_STANBY;
-    }
-
-    // Open Sparse Star
-    void OpenSparse(Vector3 position, Tone tone, float startSpeed) {
-        // Instantiate Star
-        GameObject obj = null;
-        // Star :  by Tone Count
-        if (tone.count < 10) {
-            // First Search Stanby Star
-            obj = GameObject.FindGameObjectWithTag(Constant.TAG_BOTAN_SPARSE_STAR_STANBY);
-            if (obj == null) {
-                // Instantiate New Star
-                obj = GameObject.Instantiate(BotanSparseStar, position, Quaternion.identity, StarObjects.transform);
-            }
-        }
-        else if (tone.count < 20) {
-            obj = GameObject.FindGameObjectWithTag(Constant.TAG_KIKU_SPARSE_STAR_STANBY);
-            if (obj == null) {
-                obj = GameObject.Instantiate(KikuSparseStar, position, Quaternion.identity, StarObjects.transform);
-            }
-        }
-        else if (tone.count < 30) {
-            obj = GameObject.FindGameObjectWithTag(Constant.TAG_YASHI_SPARSE_STAR_STANBY);
-            if (obj == null) {
-                obj = GameObject.Instantiate(YashiSparseStar, position, Quaternion.identity, StarObjects.transform);
-            }
-        }
-        else if (tone.count < 40) {
-            obj = GameObject.FindGameObjectWithTag(Constant.TAG_KAMURO_SPARSE_STAR_STANBY);
-            if (obj == null) {
-                obj = GameObject.Instantiate(KamuroSparseStar, position, Quaternion.identity, StarObjects.transform);
-            }
-        }
-        else {
-            obj = GameObject.FindGameObjectWithTag(Constant.TAG_YANAGI_SPARSE_STAR_STANBY);
-            if (obj == null) {
-                obj = GameObject.Instantiate(YanagiSparseStar, position, Quaternion.identity, StarObjects.transform);
-            }
-        }
-        // Change Tag to Updating
-        obj.tag = Constant.TAG_FIREWORKS_UPDATING;
-
-        // Particle System Transform
-        var transform = obj.GetComponent<Transform>();
-        transform.position = position;
-        transform.rotation = UnityEngine.Random.rotation;
-
-        // Particle System of Star
-        var particleSystem = obj.GetComponent<ParticleSystem>();
-
-        // Particle Sysytem Main Module
-        var main = particleSystem.main;
-        // Start Color
-        Color myColor = Colors.getToneColor(tone.number);
-        Color refColor = Colors.getToneColor(tone.chordRef);
-        main.startColor = (1.0f - ColorBlending) * myColor + ColorBlending * refColor;
-        // Start Speed
-        main.startSpeed = new ParticleSystem.MinMaxCurve(startSpeed, startSpeed * 1.2f);
-        // Start Size
-        float startSize = 1.33f * Mathf.Sqrt(tone.volume * 3f);
-        main.startSize = new ParticleSystem.MinMaxCurve(startSize, startSize * 1.2f);
-
-        // Saki : Star Material by Chord
-        var textureSheetAnimation = particleSystem.textureSheetAnimation;
-        // Minor => Sazanami
-        if (tone.chordID == Constant.CHORD_ID_MINOR) {
-            textureSheetAnimation.rowIndex = 1;
-        }
-        else if (tone.chordID == Constant.CHORD_ID_DIMINISHED || tone.chordID == Constant.CHORD_ID_AUGMENTED) {
-        }
-        // Other => Normal Star
-        else {
-            textureSheetAnimation.rowIndex = 0;
-        }
-
-        // Emit
-        var count = particleSystem.emission.GetBurst(0).count.constant;
-        particleSystem.Emit((int)count);
-
-        // Opend
-        isOpend = true;
-
-        // Stop this Rising
-        _particleSystem.Clear();
-        _particleSystem.Stop();
-        _particleSystem.tag = Constant.TAG_RISING_STANBY;
     }
 
     // Open Senrin FireWorks
@@ -358,14 +462,6 @@ public class Rising : MonoBehaviour{
         // Emit
         var count = particleSystem.emission.GetBurst(0).count.constant;
         particleSystem.Emit((int)count);
-
-        // Opend
-        isOpend = true;
-
-        // Stop this Rising
-        _particleSystem.Clear();
-        _particleSystem.Stop();
-        _particleSystem.tag = Constant.TAG_RISING_STANBY;
     }
 
     // Open Poka FireWorks
@@ -445,13 +541,5 @@ public class Rising : MonoBehaviour{
         // Emit
         var count = particleSystem.emission.GetBurst(0).count.constant;
         particleSystem.Emit((int)count);
-
-        // Opend
-        isOpend = true;
-
-        // Stop this Rising
-        _particleSystem.Clear();
-        _particleSystem.Stop();
-        _particleSystem.tag = Constant.TAG_RISING_STANBY;
     }
 }

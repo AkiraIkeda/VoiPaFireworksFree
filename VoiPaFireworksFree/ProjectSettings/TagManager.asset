@@ -36,6 +36,31 @@ TagManager:
   - YashiPokaStarStanby
   - KamuroPokaStarStanby
   - YanagiPokaStarStanby
+  - Botan1
+  - Botan2
+  - Botan3
+  - Botan4
+  - Botan5
+  - Kiku1
+  - Kiku2
+  - Kiku3
+  - Kiku4
+  - Kiku5
+  - Yashi1
+  - Yashi2
+  - Yashi3
+  - Yashi4
+  - Yashi5
+  - Kamuro1
+  - Kamuro2
+  - Kamuro3
+  - Kamuro4
+  - Kamuro5
+  - Yanagi1
+  - Yanagi2
+  - Yanagi3
+  - Yanagi4
+  - Yanagi5
   layers:
   - Default
   - TransparentFX
