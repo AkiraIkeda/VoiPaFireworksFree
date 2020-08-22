@@ -11,7 +11,7 @@ VoiPaプロジェクトは、音声や音楽でインタラクティブな映像
 <br>
 ## Windows, Mac & Linux Standalone exe  
 VoiPaFireworks1.1.5.zip contains the exe file builed to Windows, Mac, Linux Standalone by Unity.  
-This exe file uses the following Free Assets but the repository does not contains them because the reason of the licence. 
+This exe file uses the following Free Assets but the repository does not contains them because the reason of the licence.  
 <br>
 VoiPaFireworks1.1.5.zipには、Unity社のWindows,Mac,Linuxスタンドアロン用にビルドされたexeファイルが含まれています。  
 このexeファイルは以下のフリーアセットを使用していますが、ライセンスの都合上、リポジトリには含まれていません。  
