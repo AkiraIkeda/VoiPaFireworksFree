@@ -1,10 +1,8 @@
 # VoiPaFireworksFree ver1.1.5 Made with Unity
 VoiPa project is designed for enjoying interactive visual contents with voice or music.  
-VoiPaFireworksFree is the first one of the VoiPa project.  
 Your microphone records sounds in real-time and the colorful fireworks launched just time.  
 This Program runs in Unity 2019.2.20f1  
 VoiPaプロジェクトは、音声や音楽でインタラクティブな映像コンテンツを楽しむためのプロジェクトです。  
-VoiPaFireworksFreeは、VoiPaプロジェクトの第一弾です。  
 あなたのマイクがリアルタイムで音を録音し、タイミングよくカラフルな花火が打ち上げられます。  
 このプログラムはUnity 2019.2.20f1で動作します。  
   
