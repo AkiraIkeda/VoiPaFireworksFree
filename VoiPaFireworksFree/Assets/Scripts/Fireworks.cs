@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SocialPlatforms;
 using UnityEngine.UI;
 
 public class Fireworks : MonoBehaviour{
@@ -151,6 +152,111 @@ public class Fireworks : MonoBehaviour{
                 var main = obj.GetComponent<ParticleSystem>().main;
                 // StartSpeed : from Tone Pitch
                 main.startSpeed = volumeToVelocity(volumeMax);
+
+                // Play Particle
+                var particleSystem = obj.GetComponent<ParticleSystem>();
+                particleSystem.Play();
+            }
+        }
+    }
+
+    // Dynamic Fireworks
+    public void shootDynamic(List<Tone> tone_list, float rms = 0.0f, float dynamic_or_echo = 0.5f) {
+        // Tone List check
+        if (!tone_list.Any()) {
+            return;
+        }
+        // Copy tone
+        toneList = new List<Tone>();
+        foreach (Tone tone in tone_list) {
+            toneList.Add(tone);
+        }
+        // Color Blending
+        float colorBlending = 0.66f;
+        
+        // Chord List : Grouped by Chord
+        var chordlist = toneList.GroupBy(x => x.chordRef).ToList();
+        
+        // Volume Chord List : Grouped by Volume & Chord
+        var volumeChordList = chordlist.GroupBy(x => (int)(x.ToList().Select(y => y.volume).Max() * FireworksSizeMax)).ToList();
+
+        // Shoot Fireworks
+        for (int i = 0; i < volumeChordList.Count(); i++) {
+            // Chords in this Volume
+            var chords = volumeChordList[i].ToList();
+
+            // Tone Count Max in this Volume
+            int volumeKey = volumeChordList[i].Key;
+            float toneCountMax = toneList.Where(x => (int)(x.volume * FireworksSizeMax) == volumeKey).Select(x => x.count).Max();
+
+            // Volume : RMS * Count of Tones in this volume
+            int countCurrent = chords.Count();
+            float volumeCurrent = countCurrent * rms;
+
+            // Fireworks Type
+            // Normal : Default Fireworks Type 
+            string type = Constant.FIREWORKS_RISING_TYPE_NORMAL;
+            // Senrin : Laud Situatiion
+            if (volumeCurrent > SenrinStarVolumeThreshold && countCurrent >= SenrinStarCountMin) {
+                type = Constant.FIREWORKS_RISING_TYPE_SENRIN;
+            }
+            // Poka : Quiet Situation
+            else if (rms < QuietRMSMax) {
+                type = Constant.FIREWORKS_RISING_TYPE_POKA;
+            }
+            // Rising by Chord
+            for (int j = 0; j < chords.Count; j++) {
+                var tones = chords[j].ToList();
+                // Max Volume in this Chord
+                float volumeMax = tones.Select(x => x.volume).Max();
+
+                // Position X
+                float posX = ((j + 1) * ShootingWidth / (chords.Count + 1)) - (ShootingWidth / 2);
+                posX += UnityEngine.Random.Range(-5f, 5f);
+                // Position Y
+                float posY = Mathf.Pow(volumeToVelocity(volumeMax), 2.0f) / (2 * Mathf.Abs(Physics.gravity.y));
+                posY += UnityEngine.Random.Range(-5f, 5f);
+                // Position Vector
+                Vector3 position = new Vector3(posX, posY, 0);
+
+                // Get Rising Object
+                obj = GameObject.FindGameObjectWithTag(Constant.TAG_RISING_STANBY);
+                if (obj == null) {
+                    obj = Instantiate(RisingPrefab, position, Quaternion.identity, RisingObjects.transform);
+                }
+                // Change Rising Tag Updating
+                obj.tag = Constant.TAG_FIREWORKS_UPDATING;
+
+                var transform = obj.GetComponent<Transform>();
+                transform.position = position;
+                transform.rotation = Quaternion.identity;
+
+                // Rising Init
+                // Get Rising Component
+                Rising rising = obj.GetComponent<Rising>();
+                // Init
+                rising.Init();
+
+                // Set Type
+                rising.Type = type;
+
+                // Add ToneList
+                foreach (Tone tone in tones) {
+                    rising.ToneList.Add(tone);
+                }
+
+                // Tone Count Mean
+                rising.ToneCountValue = toneCountMax;
+
+                // Color Blending
+                rising.ColorBlending = colorBlending;
+
+                // Particle Sysytem Main Module
+                var main = obj.GetComponent<ParticleSystem>().main;
+                // StartSpeed : from Tone Pitch
+                // main.startSpeed = volumeToVelocity(volumeMax);
+                main.startSpeed = 0.0f;
+                main.startDelay = UnityEngine.Random.Range(0.0f, 0.25f);
 
                 // Play Particle
                 var particleSystem = obj.GetComponent<ParticleSystem>();

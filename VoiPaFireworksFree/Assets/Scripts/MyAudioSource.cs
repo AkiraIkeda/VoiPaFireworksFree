@@ -21,6 +21,7 @@ public class MyAudioSource : MonoBehaviour{
     public GameObject AudioSpectrumUI;
     public GameObject SpectrumBars;
     public GameObject SliderSpectrumThreshold;
+    public GameObject SliderDynamicOrEcho;
     public GameObject SliderBandPass01;
     public GameObject SliderBandPass02;
     private List<GameObject> bar_list = new List<GameObject>();
@@ -63,6 +64,8 @@ public class MyAudioSource : MonoBehaviour{
     // Tone List
     private List<Tone> toneList = new List<Tone>();
     private List<Tone> toneListBuffer = new List<Tone>();
+    private List<Tone> toneListDynamic = new List<Tone>();
+    private List<Tone> toneListEcho = new List<Tone>();
     private int toneCountCurrent = 0;
 
     // Chord List
@@ -73,6 +76,8 @@ public class MyAudioSource : MonoBehaviour{
     private List<float> rmsBuffer = new List<float>();
     private float rmsMeanCurrent = 0.0f;
     private float rmsSDCurrent = 0.0f;
+    private float rmsDiffMean = 0.0f;
+    private float rmsDiffStd = 1.0f;
 
     // Frame Count
     private int fps;
@@ -88,6 +93,9 @@ public class MyAudioSource : MonoBehaviour{
     public int bpmMin = 40;
     public int bpmMax = 180;
     public int bpmIncrement = 2;
+
+    // Dynamic or Echo
+    public float DynamicOrEcho = 0.5f;
 
     /* START */
     // Start is called before the first frame update
@@ -241,9 +249,63 @@ public class MyAudioSource : MonoBehaviour{
             // Add Tone to Tone Buffer
             foreach (Tone tone in toneList){
                 toneListBuffer.Add(tone);
+                toneListDynamic.Add(tone);
             }
 
-            // Fireworks Shoot Timing
+            // Dynamic Mode Fireworks
+            int rmsBufferCount = rmsBuffer.Count();
+            if (rmsBufferCount >= 2) {
+                // RMS Difference of All
+                var rmsDiff = Diff(rmsBuffer.ToArray());
+                // RMS Difference Normalize
+                rmsDiffMean = rmsDiff.Average();
+                rmsDiffStd = SD(rmsDiff);
+                // RMS Difference of Last
+                float rmsDiffTemp = rmsBuffer[rmsBufferCount - 1] - rmsBuffer[rmsBufferCount - 2];
+                // Normalize
+                float rmsDiffTempNorm = (rmsDiffTemp - rmsDiffMean) / (rmsDiffStd + 1e-6f);
+                // Dynamic Fireworks
+                if (rmsDiffTempNorm > 1.5f && toneListDynamic.Any()) {
+                    // Tone Count with Averaging Volume
+                    var groupListBuffer = toneListDynamic.GroupBy(x => x.number).ToList();
+                    // Temp List
+                    toneListDynamic.Clear();
+                    foreach (var group in groupListBuffer) {
+                        int countTemp = 0;
+                        float volumeTemp = 0.0f;
+                        foreach (var item in group) {
+                            countTemp += 1;
+                            volumeTemp += item.volume;
+                        }
+                        // Create Tone Copy
+                        Tone tone = new Tone();
+                        tone.number = group.Key;
+                        tone.count = countTemp;
+                        tone.volume = volumeTemp / group.Count();
+                        // Add Tone
+                        toneListDynamic.Add(tone);
+                    }
+                    // Count Filtering
+                    toneListDynamic = toneListDynamic.Where(x => x.count > frameCountMin).ToList();
+                    // Sort by Count
+                    toneListDynamic.OrderBy(x => x.count);
+                    int numTaken = (int)((1 - DynamicOrEcho) * toneListDynamic.Count());
+                    toneListDynamic = toneListDynamic.Take(numTaken).ToList();
+                    // Sort by Number
+                    toneListDynamic.OrderBy(x => x.number);
+                    // Get Chord
+                    int[] toneArray = toneListDynamic.Select(x => x.number).ToArray();
+                    var chordArray = audioAnalyzer.GetChordArray(toneArray);
+                    for (int i = 0; i < toneListDynamic.Count; i++) {
+                        toneListDynamic[i].chordRef = chordArray[i].Item2;
+                        toneListDynamic[i].chordID = chordArray[i].Item3;
+                    }
+                    // Fireworks
+                    fireworks.shootDynamic(toneListDynamic, rmsMeanCurrent, DynamicOrEcho);
+                }
+            }
+
+            // Echo Mode Fireworks
             if (frameCount % shootSpan == 0) {
 
                 // Fireworks Processing if Any Tone
@@ -270,7 +332,7 @@ public class MyAudioSource : MonoBehaviour{
 
                     // Count Filtering
                     toneListBuffer = toneListBuffer.Where(x => x.count > frameCountMin).ToList();
-
+                    
                     // Sort by Number
                     toneListBuffer.OrderBy(x => x.number);
 
@@ -278,9 +340,16 @@ public class MyAudioSource : MonoBehaviour{
                     int[] toneArray = toneListBuffer.Select(x => x.number).ToArray();
                     var chordArray = audioAnalyzer.GetChordArray(toneArray);
                     for (int i = 0; i < toneListBuffer.Count; i++) {
+                        // Buffer
                         toneListBuffer[i].chordRef = chordArray[i].Item2;
                         toneListBuffer[i].chordID = chordArray[i].Item3;
                     }
+
+                    // Sort By Count
+                    toneListBuffer.OrderBy(x => x.count);
+                    int numTaken = (int)(DynamicOrEcho * toneListBuffer.Count());
+                    toneListEcho = toneListBuffer.Take(numTaken).ToList();
+                    toneListBuffer.OrderBy(x => x.number);
 
                     // Chord Progression
                     /*
@@ -319,11 +388,10 @@ public class MyAudioSource : MonoBehaviour{
                     // RMS Mean
                     rmsMeanCurrent = rmsBuffer.Average();
 
-                    // Shoot Fireworks!!!
-                    // Shoot Rising Stars
-                    fireworks.shootRising(toneListBuffer, rmsMeanCurrent);
-
-                    // Shoot Ground Stars
+                    // Fireworks
+                    // Rising Stars
+                    fireworks.shootRising(toneListEcho, rmsMeanCurrent);
+                    // Ground Stars
                     fireworks.shootGroundEffect(toneListBuffer, rmsMeanCurrent);
                 }
 
@@ -354,6 +422,10 @@ public class MyAudioSource : MonoBehaviour{
                     Debug.Log("Count : " + rmsDiffCount);
                     Debug.Log("bpm : " + bpm);
                     */
+
+                    // Test
+                    // rmsDiffMean = mean;
+                    // rmsDiffStd = std;
                 }
 
                 // Reset Buffer
@@ -362,7 +434,6 @@ public class MyAudioSource : MonoBehaviour{
                 // Reset Frame Count
                 frameCount = 0;
             }
-
             // Frame Count
             frameCount += 1;
         }
@@ -561,6 +632,12 @@ public class MyAudioSource : MonoBehaviour{
             freqMinHz = freq02;
             freqMaxHz = freq01;
         }
+    }
+
+    // Dynamic Echo Changed
+    public void OnSliderDynamicOrEchoChanged() {
+        // Get Value from Slider
+        DynamicOrEcho = SliderDynamicOrEcho.GetComponent<Slider>().value;
     }
 
     // Dropdown Audio Device changed

@@ -20,6 +20,7 @@ public class GameManager : Singleton<GameManager>{
     public GameObject QuitUI;
     private GameObject[] allUI;
     public Dropdown dropdownSkybox;
+    public Slider SliderDynamicOrEcho;
     public Slider SliderLivelyEffect;
     public Slider SliderShootingWidth;
     public Slider SliderCameraAngle;
@@ -185,6 +186,7 @@ public class GameManager : Singleton<GameManager>{
         SliderCameraAngle.GetComponent<Slider>().value = pref.cameraAngle;
         SliderCameraHeight.GetComponent<Slider>().value = pref.cameraHeight;
         SliderCameraZoom.GetComponent<Slider>().value = pref.cameraDepth;
+        SliderDynamicOrEcho.GetComponent<Slider>().value = pref.dynamicOrEcho;
         SliderLivelyEffect.GetComponent<Slider>().value = pref.livelyEffect;
         SliderShootingWidth.GetComponent<Slider>().value = pref.shootingWidth;
     }
