@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Constant{
     /* Preferences */
-    public static Prefs PREFS_01 = new Prefs(-25f, -170f, 12.5f, 0.5f, 300f);
-    public static Prefs PREFS_02 = new Prefs(-12.5f, -190f, 55f, 0.5f, 400f);
+    public static Prefs PREFS_01 = new Prefs(-25f, -170f, 12.5f, 0.5f, 0.5f, 300f);
+    public static Prefs PREFS_02 = new Prefs(-12.5f, -190f, 55f, 0.5f, 0.5f, 400f);
 
     /* Phisics */
     public const float PHYSICS_GRAVITY_ACC = 9.8f;
